@@ -3,6 +3,14 @@
 
 One impairment to ROS 2 adoption is that all of the commands that have worked their way into muscle memory for ROS 1 developers no longer work. Also, all of the commands in ROS 2 tend to be at least two characters longer. To get information about a topic in ROS 1, one could type `rosto<tab>` (5 characters before tab), but in ROS 2 the equivalent is `ros2 to<tab>` (7 characters before tab).
 
+On top of the differences between the ROS 1 and ROS 2 command line tools, there is also a wide gulf between the different build tools that are available. For example, if you want to build a specific package (e.g. `pr2_moveit_config`) and all its dependencies, there are three possible commands, depending on the build tool.
+
+| build tool     | command                                                |
+|----------------|--------------------------------------------------------|
+| `catkin_make`  | `catkin_make --only-pkg-with-deps pr2_moveit_config`   |
+| `catkin_tools` | `catkin build pr2_moveit_config`                       |
+| `colcon`       | `colcon build --packages-up-to pr2_moveit_config`      |
+
 The `ros_command` package provides a set of command line interfaces for common actions with syntax similar to ROS 1 and `catkin_tools`, since those are often simpler, shorter and more familiar to a majority of ROS developers [[citation needed]](https://xkcd.com/285/).
 
 # Setup
@@ -22,6 +30,29 @@ Note that if you are using ROS 1, it is recommended that you source the setup AF
 
 ## roscd
 This command was not implemented in ROS 2. There is the somewhat similar [`colcon_cd`](https://colcon.readthedocs.io/en/released/user/installation.html#quick-directory-changes) command, but it requires additional installation. Instead, this package has implemented a version of `roscd` that works with ROS 2. Because you cannot change the shell's working directory from within a Python script, `roscd` is implemented in `bash`.
+
+## rosbuild
+`rosbuild` functions as a convenient wrapper for `catkin_make`, `catkin_tools` and `colcon`. (Apologies to all the people still using `rosbuild` in its [original form](http://wiki.ros.org/rosbuild), but its been deprecated since 2013.) Running `rosbuild` will automatically determine your current workspace root folder and which build tool it uses, and then running the equivalent native build command. For example running `rosbuild pr2_moveit_config` will run the three commands shown in the table in the introduction.
+
+ * Like `catkin build`, it can be run from anywhere within the workspace directory structure.
+ * Can play notification sounds when complete (see Configuration section below)
+ * Displays the build status in a fancy [blessed](https://github.com/jquast/blessed)-based terminal-focused graphical user interface (although not for `catkin_make`).
+ * Other arguments not specified in the table below are passed into the raw build command.
+
+| Category              | rosbuild                    | colcon                            | catkin_tools                      | catkin_make                            |
+|-----------------------|-----------------------------|-----------------------------------|-----------------------------------|----------------------------------------|
+| **General**           | -c, --continue_on_failure   | --continue-on-error               | --continue-on-failure             | ❌                                     |
+|                       | -j N --jobs N               | --parallel-workers N              | --jobs N                          | --jobs N                               |
+|                       | -b, --cmake_build_type X    | --cmake_args -DCMAKE_BUILD_TYPE=X | --cmake_args -DCMAKE_BUILD_TYPE=X | -DCMAKE_BUILD_TYPE=X                   |
+| **Package Selection** | --this                      | --packages-up-to pkg_name         | --this                            | --pkg pkg_name                         |
+|                       | --this --no-deps            | --packages-select pkg_name        | --this --no-deps                  | --only-pkg-with-deps                   |
+|                       | -s --skip_packages pkg_name | --packages-skip pkg_name          | 🔲                                | -DCATKIN_BLACKLIST_PACKAGES="pkg_name" |
+|                       | pkg_name                    | --packages-up-to pkg_name         | pkg_name                          | --pkg pkg_name                         |
+
+ * ❌ There is no equivalent to `--continue-on-failure` with `catkin_make` (and it is probably not possible)
+ * 🔲 There is no equivalent to `--skip_packages` in `catkin_tools`, although you could theoretically do it by parsing the dependency tree
+ * If `cmake_build_type` is NOT specified, then it defaults to the value in the Configuration. The command line argument does overwrite the configured one.
+
 
 ## rosdep_install
 One useful arcane command that pops up in many places/aliases (in both ROS 1 and ROS 2) is
@@ -68,8 +99,24 @@ The `rosclean` command works as a hybrid of `rosclean` and `catkin clean`.
 
 You can also throw the word `purge` at the beginning just to mirror the ROS 1 `rosclean` more closely.
 
+# Configuration
+Users may change the default behavior of `ros_command` by putting settings in yaml files in two places.
+ * `ros_command.yaml` in the workspace root (highest precedence)
+ * `~/.ros/ros_command.yaml`
+
+The current settings you may change are summarized in this table.
+
+| key              | type                   | default | note                                                           |
+|------------------|------------------------|---------|----------------------------------------------------------------|
+| cmake_build_type | string                 | Release | [CMAKE_BUILD_TYPE](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html) |
+| graphic_build    | boolean                | True    | By default, `rosbuild` shows a fancy graphical interface       |
+| success_sound    | string / absolute path | None    | Sound file path to play after successful builds                |
+| fail_sound       | string / absolute path | None    | Sound file path to play after **un**successful builds          |
+
 
 # Power Usage
 If you like really short, convenient commands, try adding these to your `~/.bashrc`
 
     alias sros='source_ros'                  # Easier tab completion than source_ros
+    alias asdf='rosbuild --this -c'          # Builds the package in the current directory (and its dependencies)
+    alias zxcv='rosbuild --this --no-deps'   # Builds just the package in the current directory
