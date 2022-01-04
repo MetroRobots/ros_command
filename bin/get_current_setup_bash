@@ -1,0 +1,6 @@
+#!/usr/bin/python3
+
+from ros_command.commands.get_current_setup_bash import main
+
+if __name__ == '__main__':
+    main()
