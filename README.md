@@ -124,3 +124,7 @@ If you like really short, convenient commands, try adding these to your `~/.bash
     alias sros='source_ros'                  # Easier tab completion than source_ros
     alias asdf='rosbuild --this -c'          # Builds the package in the current directory (and its dependencies)
     alias zxcv='rosbuild --this --no-deps'   # Builds just the package in the current directory
+
+# Acknowledgements
+ * `ros_command`'s core functionality was implemented at [PickNik Robotics](https://github.com/PickNikRobotics).
+ * The implementation of `roscd` was originally developed by [Vatan Aksoy Tezer](https://github.com/vatanaksoytezer)
