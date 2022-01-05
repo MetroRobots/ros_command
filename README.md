@@ -37,6 +37,10 @@ This command was not implemented in ROS 2. There is the somewhat similar [`colco
  * Like `catkin build`, it can be run from anywhere within the workspace directory structure.
  * Can play notification sounds when complete (see Configuration section below)
  * Displays the build status in a fancy [blessed](https://github.com/jquast/blessed)-based terminal-focused graphical user interface (although not for `catkin_make`).
+
+https://user-images.githubusercontent.com/1016143/148160202-03f6a5e5-f914-459b-8157-b50d2ed3d3c1.mp4
+
+
  * Other arguments not specified in the table below are passed into the raw build command.
 
 | Category              | rosbuild                    | colcon                            | catkin_tools                      | catkin_make                            |
