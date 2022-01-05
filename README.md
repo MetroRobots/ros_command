@@ -1,4 +1,4 @@
-# ros_command
+![ros_command](doc/logo.png)
 ## Unifying the ROS command line tools
 
 One impairment to ROS 2 adoption is that all of the commands that have worked their way into muscle memory for ROS 1 developers no longer work. Also, all of the commands in ROS 2 tend to be at least two characters longer. To get information about a topic in ROS 1, one could type `rosto<tab>` (5 characters before tab), but in ROS 2 the equivalent is `ros2 to<tab>` (7 characters before tab).
