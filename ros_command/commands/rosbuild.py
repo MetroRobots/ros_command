@@ -11,9 +11,9 @@ async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--continue-on-failure', action='store_true')
     parser.add_argument('-j', '--jobs', type=int)
-    parser.add_argument('-b', '--cmake_build_type')
+    parser.add_argument('-b', '--cmake-build-type')
     parser.add_argument('-t', '--test', action='store_true')
-    parser.add_argument('-g', '--toggle_graphics', action='store_true')
+    parser.add_argument('-g', '--toggle-graphics', action='store_true')
     args, unknown_args = parser.parse_known_args()
 
     build_type, workspace_root = get_workspace_root()
