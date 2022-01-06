@@ -10,9 +10,9 @@ from ros_command.util import sizeof_fmt
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-y', '--yes_to_all', action='store_true')
-    parser.add_argument('-c', '--just_checking', action='store_true')
-    parser.add_argument('-n', '--no_sizes', action='store_true')
+    parser.add_argument('-y', '--yes-to-all', '--no-confirm', action='store_true')
+    parser.add_argument('-c', '--just-checking', action='store_true')
+    parser.add_argument('-n', '--no-sizes', action='store_true')
     parser.add_argument('packages', metavar='package', nargs='*')
     args, unknown_args = parser.parse_known_args()
     if args.packages:

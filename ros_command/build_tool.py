@@ -209,7 +209,7 @@ def get_package_selection_args(argv, build_type, pkg_name):
     parser = argparse.ArgumentParser()
     parser.add_argument('--this', action='store_true')
     parser.add_argument('-n', '--no-deps', action='store_true')
-    parser.add_argument('-s', '--skip_packages', nargs='+')
+    parser.add_argument('-s', '--skip-packages', nargs='+')
     parser.add_argument('include_packages', metavar='include_package', nargs='*')
     args, remaining_argv = parser.parse_known_args(argv)
 
