@@ -221,22 +221,21 @@ def get_package_selection_args(argv, build_type, pkg_name):
         raise RuntimeError('With --no-deps, you must specify packages to build.')
 
     if build_type == BuildType.COLCON:
+        if args.no_deps:
+            package_selection_args.append('--packages-select')
+        elif args.this or args.include_packages:
+            package_selection_args.append('--packages-up-to')
         if args.this:
-            if args.no_deps:
-                package_selection_args.append('--packages-select')
-            else:
-                package_selection_args.append('--packages-up-to')
             package_selection_args.append(pkg_name)
         if args.include_packages:
-            package_selection_args.append('--packages-up-to')
             package_selection_args += args.include_packages
         if args.skip_packages:
             package_selection_args.append('--packages-skip')
             package_selection_args += args.skip_packages
     elif build_type == BuildType.CATKIN_TOOLS:
+        if args.no_deps:
+            package_selection_args.append('--no-deps')
         if args.this:
-            if args.no_deps:
-                package_selection_args.append('--no-deps')
             package_selection_args.append(pkg_name)
         if args.include_packages:
             package_selection_args += args.include_packages
