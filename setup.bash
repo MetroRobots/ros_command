@@ -16,28 +16,11 @@ if ! $(type -t roscd) ; then
             return
         fi
 
-        # If no arguments, go to the workspace root
-        if [ $# == 0 ] ; then
-            cd $(get_current_setup_bash)
-            return
-        fi
-
-        PKG_ROS2_PATH="$(ros2 pkg prefix $1)"
-        if [ "$PKG_ROS2_PATH" == "/opt/ros/$ROS_DISTRO" ]
-        then
-            cd "$PKG_ROS2_PATH/share/$1"
-        else
-            if [[ "$PKG_ROS2_PATH" == *"install"* ]]
-            then
-                # Move to root of project
-                cd $(get_current_setup_bash)
-                cd $(colcon list --packages-select "$1" --paths-only)
-            else
-                echo "Unable to find package $1"
-            fi
-        fi
+        cd $(get_ros_directory $1)
+        return
     }
 
+    # TODO: Reimplement completions
     _roscd_completions()
     {
         case $COMP_CWORD in
