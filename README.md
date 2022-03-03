@@ -29,7 +29,7 @@ Note that if you are using ROS 1, it is recommended that you source the setup AF
 # Commands
 
 ## roscd
-This command was not implemented in ROS 2. There is the somewhat similar [`colcon_cd`](https://colcon.readthedocs.io/en/released/user/installation.html#quick-directory-changes) command, but it requires additional installation. Instead, this package has implemented a version of `roscd` that works with ROS 2. Because you cannot change the shell's working directory from within a Python script, `roscd` is implemented in `bash`.
+This command was not implemented in ROS 2. There is the somewhat similar [`colcon_cd`](https://colcon.readthedocs.io/en/released/user/installation.html#quick-directory-changes) command, but it requires additional installation. Instead, this package has implemented a version of `roscd` that works with ROS 2. Because you cannot change the shell's working directory from within a Python script, `roscd` is implemented in `bash`, depending on the Python script `get_ros_directory`.
 
 ## rosbuild
 `rosbuild` functions as a convenient wrapper for `catkin_make`, `catkin_tools` and `colcon`. (Apologies to all the people still using `rosbuild` in its [original form](http://wiki.ros.org/rosbuild), but its been deprecated since 2013.) Running `rosbuild` will automatically determine your current workspace root folder and which build tool it uses, and then running the equivalent native build command. For example running `rosbuild pr2_moveit_config` will run the three commands shown in the table in the introduction.
