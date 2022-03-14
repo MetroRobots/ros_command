@@ -169,7 +169,12 @@ class Log(Box):
 
     def update(self, lines):
         max_lines = self.h - 2
-        self.lines = lines[-max_lines:]
+        self.lines = []
+        # Only save useful number of lines
+        for line in lines[-max_lines:]:
+            # Replace tabs with spaces for proper length computations
+            fixed_line = line.replace('\t', '    ')
+            self.lines.append(fixed_line)
 
     def draw(self, display):
         Box.draw(self, display)
