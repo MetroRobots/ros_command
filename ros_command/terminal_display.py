@@ -305,6 +305,11 @@ class Splitter(TerminalComponent):
         while sum(sizes) >= total_size:
             factor *= 0.95
             sizes = [max(1, int(ratio * total_size * factor)) for ratio in ratios]
+
+        # If leftover, add to last section
+        remainder = total_size - sum(sizes)
+        if remainder:
+            sizes[-1] += remainder
         return sizes
 
     def draw(self, display):
