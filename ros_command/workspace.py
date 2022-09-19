@@ -1,3 +1,4 @@
+import click
 import os
 import pathlib
 import re
@@ -72,7 +73,7 @@ def get_current_package_name(cur_dir=pathlib.Path('.')):
             return pkg_name
 
 
-def get_ros_version():
+def get_ros_version(fail_quietly=False):
     """Return ROS Version and Distro."""
     env = os.environ
     version = env.get('ROS_VERSION')
@@ -80,4 +81,8 @@ def get_ros_version():
     if version and distro:
         return int(version), distro
 
-    return version, distro
+    if fail_quietly:
+        return version, distro
+
+    click.secho('Unable to determine ROS distro. Please source workspace.', fg='red')
+    exit(-1)
