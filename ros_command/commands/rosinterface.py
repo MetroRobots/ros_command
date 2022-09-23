@@ -116,17 +116,8 @@ async def main(interface_type):
 
     ii = InterfaceInterface(version, distro, interface_type)
 
-    if version == 1:
-        if interface_type != 'action':
-            # Pass through for rosmsg/rossrv
-            cmd = ii.get_base_command(args.verb)
-            if args.verb in ['show', 'md5']:
-                cmd.append(args.interface_name)
-            elif args.verb == 'package':
-                cmd.append(args.package_name)
-            code = await run(cmd)
-            exit(code)
-        elif args.verb in ['show', 'md5']:
+    if version == 1 and interface_type == 'action':
+        if args.verb in ['show', 'md5']:
             interface = ii.parse_interface(args.interface_name)
             for component in get_action_parts(interface):
                 name = to_string(component)
@@ -152,6 +143,15 @@ async def main(interface_type):
         # Pass through to ros2 interface with appropriate args
         command = ii.get_base_command(args.verb, filter_flag=True)
         await run(command)
+    elif version == 1:
+        # Pass through for rosmsg/rossrv
+        cmd = ii.get_base_command(args.verb)
+        if args.verb == 'md5':
+            cmd.append(args.interface_name)
+        elif args.verb == 'package':
+            cmd.append(args.package_name)
+        code = await run(cmd)
+        exit(code)
     elif args.verb == 'package':
         command = ii.get_base_command('package')
         command.append(args.package_name)
