@@ -42,37 +42,12 @@ async def list_actions(ii, distro, pkg=None):
     return sorted(results)
 
 
-async def list_interfaces_ros2(ii, types=None):
-    interfaces = []
-
-    def out_cb(line):
-        if line and line[0] != ' ' and line.endswith(':\n'):
-            return
-        interface = ii.parse_interface(line.strip())
-        if types is not None and interface.type in types:
-            interfaces.append(interface)
-
-    await run(ii.get_base_command('list'), stdout_callback=out_cb)
-    return interfaces
-
-
-async def list_interfaces_by_name_ros2(ii, types=None):
-    interfaces = await list_interfaces_ros2(ii, types)
-
-    stems = collections.defaultdict(list)
-    for interface in interfaces:
-        stems[interface.name].append(interface)
-
-    return stems
-
-
 async def translate_to_full_names(base_s, interface_type, ii):
     pieces = base_s.split('/')
 
     # If no /, then only the interface name is specified and list all the interfaces that have the same name
     if len(pieces) == 1:
-        stems = await list_interfaces_by_name_ros2(ii, [interface_type])
-        return stems[base_s]
+        return await ii.list_interfaces(base_s)
     else:
         return [ii.parse_interface(base_s)]
 
@@ -83,13 +58,15 @@ class InterfaceInterface:
         self.distro = distro
         self.interface_type = interface_type
 
-    def get_base_command(self, verb, interface_type=None):
+    def get_base_command(self, verb, interface_type=None, filter_flag=False):
         if interface_type is None:
             interface_type = self.interface_type
         if self.version == 1:
             return [f'/opt/ros/{self.distro}/bin/ros{interface_type}', verb]
         else:
             cmd = [f'/opt/ros/{self.distro}/bin/ros2', 'interface', verb]
+            if filter_flag:
+                cmd.append('-' + interface_type[0])  # -m for msg, -s for srv, etc
             return cmd
 
     def parse_interface(self, s):
@@ -103,6 +80,19 @@ class InterfaceInterface:
             return ROSInterface(*pieces)
         else:
             raise RuntimeError(f'Cannot parse interface for "{s}"')
+
+    async def list_interfaces(self, name_filter=None):
+        interfaces = []
+
+        def out_cb(line):
+            if line and line[0] != ' ' and line.endswith(':\n'):
+                return
+            interface = self.parse_interface(line.strip())
+            if not name_filter or interface.name == name_filter:
+                interfaces.append(interface)
+
+        await run(self.get_base_command('list', filter_flag=True), stdout_callback=out_cb)
+        return interfaces
 
 
 async def main(interface_type):
@@ -162,8 +152,7 @@ async def main(interface_type):
             await run(base_command + [to_string(interface, two_piece=False)])
     elif args.verb in ['list', 'packages']:
         # Pass through to ros2 interface with appropriate args
-        command = ii.get_base_command(args.verb)
-        command.append('-' + interface_type[0])  # -m for msg, -s for srv, etc
+        command = ii.get_base_command(args.verb, filter_flag=True)
         await run(command)
     elif args.verb == 'package':
         # Pass through to ros2 interface, but skip interfaces with the wrong type
