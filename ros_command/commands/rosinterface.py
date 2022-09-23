@@ -132,6 +132,7 @@ async def main(interface_type):
                 name = to_string(component)
                 cmd = ii.get_base_command(args.verb, interface_type='msg')
                 cmd.append(name)
+                click.secho(f'[{name}] ', nl=False)
                 await run(cmd)
         elif args.verb == 'list':
             for interface in await ii.list_actions():
@@ -140,12 +141,8 @@ async def main(interface_type):
             for interface in await ii.list_actions(pkg=args.package_name):
                 print(to_string(interface))
         elif args.verb == 'packages':
-            seen = set()
-            for interface in await ii.list_actions():
-                if interface.package not in seen:
-                    print(interface.package)
-                    seen.add(interface.package)
-
+            pkgs = set(interface.package for interface in await ii.list_actions())
+            print('\n'.join(sorted(pkgs)))
     elif args.verb == 'show':
         base_command = ii.get_base_command(args.verb)
         for interface in await ii.translate_to_full_names(args.interface_name):
@@ -156,13 +153,13 @@ async def main(interface_type):
         command = ii.get_base_command(args.verb, filter_flag=True)
         await run(command)
     elif args.verb == 'package':
-        # Pass through to ros2 interface, but skip interfaces with the wrong type
-        key = f'/{interface_type}'
-
-        def package_output_cb(line):
-            if key in line:
-                click.secho(line, nl=False)
-        command = ii.get_base_command(args.verb)
-        await run(command + [args.package_name], stdout_callback=package_output_cb)
+        command = ii.get_base_command('package')
+        command.append(args.package_name)
+        _, out, _ = await get_output(command)
+        # ROS 2 does not provide the type-specific flags for this command (yet) so
+        # for now we manually filter out the interfaces with the wrong type
+        for interface in map(ii.parse_interface, filter(None, sorted(out.split('\n')))):
+            if interface.type == interface_type:
+                print(to_string(interface))
     else:
         raise NotImplementedError('No equivalent md5 command in ros2')
