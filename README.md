@@ -76,12 +76,19 @@ Now there's the new simple command `rosdep_install` which will do the same thing
 
 
 ## rosmsg / rossrv / rosaction
-In ROS 2, `rosmsg` and `rossrv` were replaced by `ros2 interface`, which can also handle actions. For most commands, calling the `rosbuild` version of `rosmsg` and `rossrv` will just call either the ROS 1 `rosmsg/rossrv` command or the equivalent `ros2 interface` command.
+In ROS 2, `rosmsg` and `rossrv` were replaced by `ros2 interface`, which can also handle actions. For most commands, calling the `ros_command` version of `rosmsg` and `rossrv` will just call either the ROS 1 `rosmsg/rossrv` command or the equivalent `ros2 interface` command.
 
-In ROS 1, if you call `rosaction <show|md5>`, it will run `rosmsg <command>` on the constituent parts (i.e. Goal/Result/Feedback). The other `rosaction <command>` variations will list only the appropriate content for packages with actions defined.
+#### Brand New Functionality
+ * The basic `show` command now has syntax highlighting.
+   ![screenshot showing syntax highlighting](doc/rosmsg0.png)
+ * The `show` command now has a `-r` option to recurse through the interface definitions.
+   ![screenshot showing recursive message definitions](doc/rosmsg1.png)
 
-In ROS 2, if you call `ros<msg|srv|action> show`, there is advanced functionality for matching partial names.
-The equivalent command to ROS 1's `rosmsg show Point` is `ros2 interface show geometry_msgs/msg/Point`. This is cumbersome for a number of reasons. First, ROS 1 is nearly half has short (17 chars vs 43 chars). It also requires you remember what package the message you are looking for is. The version implemented here will search for matching fully qualified names, and then print the fully qualified name and the contents of the interface definition.
+#### Added ROS 1 Functionality
+ * `rosaction <command>` - `rosaction` does not exist in ROS 1, so it is implemented here, often calling `rosmsg <command>` on the constituent parts (i.e. Goal/Result/Feedback).
+
+#### Added ROS 2 Functionality
+ * `ros<msg|srv|action> show` without namespaces - The equivalent command to ROS 1's `rosmsg show Point` is `ros2 interface show geometry_msgs/msg/Point`. This is cumbersome for a number of reasons. First, ROS 1 is nearly half has short (17 chars vs 43 chars). It also requires you remember what package the message you are looking for is. The version implemented here will search for matching fully qualified names, and then print the fully qualified name and the contents of the interface definition.
 
 ## source_ros
 If you use a single ROS workspace, then you probably source the appropriate `setup.bash` from the `.bashrc` file. However, if you use multiple, you can source the appropriate `setup.bash` with one simple command: `source_ros`. This will find the appropriate `setup.bash` by determining the current ROS Workspace based on the folder the script is executed in. Typically, this will either source the `devel/setup.bash` or `install/setup.bash` depending on whether it is ROS 1 or 2. (You can also have a setup.bash in the workspace root if you need custom logic to source additional environment variables.)
