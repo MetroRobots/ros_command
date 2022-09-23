@@ -69,8 +69,17 @@ async def translate_to_full_names(base_s, interface_type, distro):
 
 async def main(interface_type):
     parser = argparse.ArgumentParser()
-    parser.add_argument('verb', choices=['show', 'info', 'list', 'md5', 'package', 'packages'])
-    args, unknown_args = parser.parse_known_args()
+    subparsers = parser.add_subparsers(dest='verb')
+    show_parser = subparsers.add_parser('show', aliases=['info'])
+    show_parser.add_argument('interface_name')
+    subparsers.add_parser('list')
+    md5_parser = subparsers.add_parser('md5')
+    md5_parser.add_argument('interface_name')
+    pkg_parser = subparsers.add_parser('package')
+    pkg_parser.add_argument('package_name')
+    subparsers.add_parser('packages')
+
+    args = parser.parse_args()
     if args.verb == 'info':  # Alias
         args.verb = 'show'
 
@@ -79,17 +88,21 @@ async def main(interface_type):
     if version == 1:
         if interface_type != 'action':
             # Pass through for rosmsg/rossrv
-            code = await run([f'/opt/ros/{distro}/bin/ros{interface_type}', args.verb] + unknown_args)
+            cmd = [f'/opt/ros/{distro}/bin/ros{interface_type}', args.verb]
+            if args.verb in ['show', 'md5']:
+                cmd.append(args.interface_name)
+            elif args.verb == 'package':
+                cmd.append(args.package_name)
+            code = await run(cmd)
             exit(code)
         elif args.verb in ['show', 'md5']:
-            action_name = unknown_args.pop(0)
             for part in ACTION_PARTS:
-                await run([f'/opt/ros/{distro}/bin/rosmsg', args.verb, f'{action_name}{part}'] + unknown_args)
+                await run([f'/opt/ros/{distro}/bin/rosmsg', args.verb, f'{args.interface_name}{part}'])
         elif args.verb == 'list':
             for pkg, action in await list_actions(distro):
                 print(f'{pkg}/{action}')
         elif args.verb == 'package':
-            for pkg, action in await list_actions(distro, pkg=unknown_args[0]):
+            for pkg, action in await list_actions(distro, pkg=args.package_name):
                 print(f'{pkg}/{action}')
         elif args.verb == 'packages':
             seen = set()
@@ -100,15 +113,14 @@ async def main(interface_type):
 
     elif args.verb == 'show':
         base_command = [f'/opt/ros/{distro}/bin/ros2', 'interface', 'show']
-        base_s = unknown_args.pop(0)
-        for full_name in await translate_to_full_names(base_s, interface_type, distro):
+        for full_name in await translate_to_full_names(args.interface_name, interface_type, distro):
             click.secho(f'[{full_name}]', fg='blue')
-            await run(base_command + [full_name] + unknown_args)
+            await run(base_command + [full_name])
     elif args.verb in ['list', 'packages']:
         # Pass through to ros2 interface with appropriate args
         command = [f'/opt/ros/{distro}/bin/ros2', 'interface', args.verb]
         command.append('-' + interface_type[0])  # -m for msg, -s for srv, etc
-        await run(command + unknown_args)
+        await run(command)
     elif args.verb == 'package':
         # Pass through to ros2 interface, but skip interfaces with the wrong type
         key = f'/{interface_type}'
@@ -117,6 +129,6 @@ async def main(interface_type):
             if key in line:
                 click.secho(line, nl=False)
         command = [f'/opt/ros/{distro}/bin/ros2', 'interface', 'package']
-        await run(command + unknown_args, stdout_callback=package_output_cb)
+        await run(command + [args.package_name], stdout_callback=package_output_cb)
     else:
         raise NotImplementedError('No equivalent md5 command in ros2')
