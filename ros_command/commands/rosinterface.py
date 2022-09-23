@@ -75,13 +75,16 @@ class InterfaceInterface:
         else:
             return [self.parse_interface(base_s)]
 
+    async def list_packages(self, interface_type=None):
+        # List all packages with any messages
+        _, out, _ = await get_output(self.get_base_command('packages', interface_type))
+        return sorted(set(filter(None, out.split('\n'))))
+
     async def list_actions(self, pkg=None):
         if pkg:
             packages = [pkg]
         else:
-            # List all packages with any messages
-            _, out, _ = await get_output(self.get_base_command('packages', interface_type='msg'))
-            packages = set(filter(None, out.split('\n')))
+            packages = await self.list_packages('msg')
 
         results = []
         for pkg in packages:
