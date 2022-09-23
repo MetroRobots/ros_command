@@ -194,6 +194,8 @@ async def main(interface_type):
     md5_parser.add_argument('interface_name')
     pkg_parser = subparsers.add_parser('package')
     pkg_parser.add_argument('package_name')
+    proto_parser = subparsers.add_parser('proto')
+    proto_parser.add_argument('interface_name')
     subparsers.add_parser('packages')
 
     args = parser.parse_args()
@@ -230,6 +232,10 @@ async def main(interface_type):
         elif args.verb == 'packages':
             pkgs = set(interface.package for interface in await ii.list_actions())
             print('\n'.join(sorted(pkgs)))
+        elif args.verb == 'proto':
+            raise NotImplementedError('Proto is not implemented for ROS 1, although it could be.')
+        else:
+            raise RuntimeError(f'Unknown verb "{args.verb}" for ROS 1 action')
     elif args.verb == 'show':
         for interface in await ii.translate_to_full_names(args.interface_name):
             click.secho(f'[{to_string(interface)}]', fg='blue')
@@ -245,6 +251,8 @@ async def main(interface_type):
             cmd.append(args.interface_name)
         elif args.verb == 'package':
             cmd.append(args.package_name)
+        elif args.verb == 'proto':
+            raise NotImplementedError('Proto is not implemented for ROS 1, although it could be.')
         code = await run(cmd)
         exit(code)
     elif args.verb == 'package':
@@ -256,5 +264,19 @@ async def main(interface_type):
         for interface in map(ii.parse_interface, filter(None, sorted(out.split('\n')))):
             if interface.type == interface_type:
                 print(to_string(interface))
+    elif args.verb == 'proto':
+        full_names = await ii.translate_to_full_names(args.interface_name)
+        if not full_names:
+            click.secho(f'Cannot find interface "{args.interface_name}"', fg='red')
+            exit(-1)
+        elif len(full_names) > 1:
+            click.secho(f'Interface "{args.interface_name}" is ambiguous. Options:', fg='yellow')
+            for interface in full_names:
+                click.secho(f' - {to_string(interface)}', fg='yellow')
+            exit(-1)
+
+        command = ii.get_base_command('proto')
+        command.append(to_string(full_names[0], two_piece=False))
+        await run(command)
     else:
         raise NotImplementedError('No equivalent md5 command in ros2')

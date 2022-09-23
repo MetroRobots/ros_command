@@ -89,6 +89,7 @@ In ROS 2, `rosmsg` and `rossrv` were replaced by `ros2 interface`, which can als
 
 #### Added ROS 2 Functionality
  * `ros<msg|srv|action> show` without namespaces - The equivalent command to ROS 1's `rosmsg show Point` is `ros2 interface show geometry_msgs/msg/Point`. This is cumbersome for a number of reasons. First, ROS 1 is nearly half has short (17 chars vs 43 chars). It also requires you remember what package the message you are looking for is. The version implemented here will search for matching fully qualified names, and then print the fully qualified name and the contents of the interface definition.
+ * `rosmsg proto` also works without namespaces IF there's only one type that matches.
 
 ## source_ros
 If you use a single ROS workspace, then you probably source the appropriate `setup.bash` from the `.bashrc` file. However, if you use multiple, you can source the appropriate `setup.bash` with one simple command: `source_ros`. This will find the appropriate `setup.bash` by determining the current ROS Workspace based on the folder the script is executed in. Typically, this will either source the `devel/setup.bash` or `install/setup.bash` depending on whether it is ROS 1 or 2. (You can also have a setup.bash in the workspace root if you need custom logic to source additional environment variables.)
