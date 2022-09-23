@@ -24,24 +24,6 @@ def to_string(interface, two_piece=True):
         return f'{interface.package}/{interface.type}/{interface.name}'
 
 
-async def list_actions(ii, distro, pkg=None):
-    if pkg:
-        packages = [pkg]
-    else:
-        # List all packages with any messages
-        _, out, _ = await get_output(ii.get_base_command('packages', interface_type='msg'))
-        packages = set(filter(None, out.split('\n')))
-
-    results = []
-    for pkg in packages:
-        _, path_s, _ = await get_output([f'/opt/ros/{distro}/bin/rospack', 'find', pkg])
-        path = pathlib.Path(path_s.strip()) / 'action'
-        if path.exists():
-            for filename in path.glob('*.action'):
-                results.append(ROSInterface(pkg, 'action', filename.stem))
-    return sorted(results)
-
-
 class InterfaceInterface:
     def __init__(self, version, distro, interface_type):
         self.version = version
@@ -93,6 +75,23 @@ class InterfaceInterface:
         else:
             return [self.parse_interface(base_s)]
 
+    async def list_actions(self, pkg=None):
+        if pkg:
+            packages = [pkg]
+        else:
+            # List all packages with any messages
+            _, out, _ = await get_output(self.get_base_command('packages', interface_type='msg'))
+            packages = set(filter(None, out.split('\n')))
+
+        results = []
+        for pkg in packages:
+            _, path_s, _ = await get_output([f'/opt/ros/{self.distro}/bin/rospack', 'find', pkg])
+            path = pathlib.Path(path_s.strip()) / 'action'
+            if path.exists():
+                for filename in path.glob('*.action'):
+                    results.append(ROSInterface(pkg, 'action', filename.stem))
+        return sorted(results)
+
 
 async def main(interface_type):
     parser = argparse.ArgumentParser()
@@ -132,14 +131,14 @@ async def main(interface_type):
                 cmd.append(name)
                 await run(cmd)
         elif args.verb == 'list':
-            for interface in await list_actions(ii, distro):
+            for interface in await ii.list_actions():
                 print(to_string(interface))
         elif args.verb == 'package':
-            for interface in await list_actions(ii, distro, pkg=args.package_name):
+            for interface in await ii.list_actions(pkg=args.package_name):
                 print(to_string(interface))
         elif args.verb == 'packages':
             seen = set()
-            for interface in await list_actions(ii, distro):
+            for interface in await ii.list_actions():
                 if interface.package not in seen:
                     print(interface.package)
                     seen.add(interface.package)
