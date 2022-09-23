@@ -42,16 +42,6 @@ async def list_actions(ii, distro, pkg=None):
     return sorted(results)
 
 
-async def translate_to_full_names(base_s, interface_type, ii):
-    pieces = base_s.split('/')
-
-    # If no /, then only the interface name is specified and list all the interfaces that have the same name
-    if len(pieces) == 1:
-        return await ii.list_interfaces(base_s)
-    else:
-        return [ii.parse_interface(base_s)]
-
-
 class InterfaceInterface:
     def __init__(self, version, distro, interface_type):
         self.version = version
@@ -93,6 +83,15 @@ class InterfaceInterface:
 
         await run(self.get_base_command('list', filter_flag=True), stdout_callback=out_cb)
         return interfaces
+
+    async def translate_to_full_names(self, base_s):
+        pieces = base_s.split('/')
+
+        # If no /, then only the interface name is specified and list all the interfaces that have the same name
+        if len(pieces) == 1:
+            return await self.list_interfaces(base_s)
+        else:
+            return [self.parse_interface(base_s)]
 
 
 async def main(interface_type):
@@ -147,7 +146,7 @@ async def main(interface_type):
 
     elif args.verb == 'show':
         base_command = ii.get_base_command(args.verb)
-        for interface in await translate_to_full_names(args.interface_name, interface_type, ii):
+        for interface in await ii.translate_to_full_names(args.interface_name):
             click.secho(f'[{to_string(interface)}]', fg='blue')
             await run(base_command + [to_string(interface, two_piece=False)])
     elif args.verb in ['list', 'packages']:
