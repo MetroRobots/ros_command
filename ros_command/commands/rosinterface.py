@@ -7,7 +7,21 @@ import click
 from ros_command.command_lib import get_output, run
 from ros_command.workspace import get_ros_version
 
+ROSInterface = collections.namedtuple('ROSInterface', ['package', 'type', 'name'])
+
 ACTION_PARTS = ['Goal', 'Result', 'Feedback']
+
+
+def get_action_parts(base_interface):
+    for action_part in ACTION_PARTS:
+        yield ROSInterface(base_interface.package, 'msg', f'{base_interface.name}{action_part}')
+
+
+def to_string(interface, two_piece=True):
+    if two_piece:
+        return f'{interface.package}/{interface.name}'
+    else:
+        return f'{interface.package}/{interface.type}/{interface.name}'
 
 
 async def list_actions(ii, distro, pkg=None):
@@ -24,7 +38,7 @@ async def list_actions(ii, distro, pkg=None):
         path = pathlib.Path(path_s.strip()) / 'action'
         if path.exists():
             for filename in path.glob('*.action'):
-                results.append((pkg, filename.stem))
+                results.append(ROSInterface(pkg, 'action', filename.stem))
     return sorted(results)
 
 
@@ -32,11 +46,11 @@ async def list_interfaces_ros2(ii, types=None):
     interfaces = []
 
     def out_cb(line):
-        line = line.strip()
-        pieces = line.split('/')
-        if len(pieces) == 3:
-            if types is not None and pieces[1] in types:
-                interfaces.append(line)
+        if line and line[0] != ' ' and line.endswith(':\n'):
+            return
+        interface = ii.parse_interface(line.strip())
+        if types is not None and interface.type in types:
+            interfaces.append(interface)
 
     await run(ii.get_base_command('list'), stdout_callback=out_cb)
     return interfaces
@@ -47,24 +61,20 @@ async def list_interfaces_by_name_ros2(ii, types=None):
 
     stems = collections.defaultdict(list)
     for interface in interfaces:
-        pieces = interface.split('/')
-        stems[pieces[-1]].append(interface)
+        stems[interface.name].append(interface)
 
     return stems
 
 
 async def translate_to_full_names(base_s, interface_type, ii):
     pieces = base_s.split('/')
-    if len(pieces) == 3:
-        # String already is full qualified
-        return [base_s]
-    elif len(pieces) == 2:
-        # If the interface type is missing, insert it
-        return [f'{pieces[0]}/{interface_type}/{pieces[1]}']
-    else:
-        # If only the interface name is specified, list all the interfaces and return the matches
+
+    # If no /, then only the interface name is specified and list all the interfaces that have the same name
+    if len(pieces) == 1:
         stems = await list_interfaces_by_name_ros2(ii, [interface_type])
         return stems[base_s]
+    else:
+        return [ii.parse_interface(base_s)]
 
 
 class InterfaceInterface:
@@ -81,6 +91,18 @@ class InterfaceInterface:
         else:
             cmd = [f'/opt/ros/{self.distro}/bin/ros2', 'interface', verb]
             return cmd
+
+    def parse_interface(self, s):
+        pieces = s.split('/')
+        # If only two pieces, assume the interface_type is missing
+        # i.e. convert geometry_msgs/Point to geometry_msgs/msg/Point
+        if len(pieces) == 2:
+            return ROSInterface(pieces[0], self.interface_type, pieces[1])
+        # If three pieces, assume the interface type is specified
+        elif len(pieces) == 3:
+            return ROSInterface(*pieces)
+        else:
+            raise RuntimeError(f'Cannot parse interface for "{s}"')
 
 
 async def main(interface_type):
@@ -114,28 +136,30 @@ async def main(interface_type):
             code = await run(cmd)
             exit(code)
         elif args.verb in ['show', 'md5']:
-            for part in ACTION_PARTS:
-                cmd = ii.get_base_command(args.verb)
-                cmd.append(f'{args.interface_name}{part}')
+            interface = ii.parse_interface(args.interface_name)
+            for component in get_action_parts(interface):
+                name = to_string(component)
+                cmd = ii.get_base_command(args.verb, interface_type='msg')
+                cmd.append(name)
                 await run(cmd)
         elif args.verb == 'list':
-            for pkg, action in await list_actions(ii, distro):
-                print(f'{pkg}/{action}')
+            for interface in await list_actions(ii, distro):
+                print(to_string(interface))
         elif args.verb == 'package':
-            for pkg, action in await list_actions(ii, distro, pkg=args.package_name):
-                print(f'{pkg}/{action}')
+            for interface in await list_actions(ii, distro, pkg=args.package_name):
+                print(to_string(interface))
         elif args.verb == 'packages':
             seen = set()
-            for pkg, action in await list_actions(ii, distro):
-                if pkg not in seen:
-                    print(pkg)
-                    seen.add(pkg)
+            for interface in await list_actions(ii, distro):
+                if interface.package not in seen:
+                    print(interface.package)
+                    seen.add(interface.package)
 
     elif args.verb == 'show':
         base_command = ii.get_base_command(args.verb)
-        for full_name in await translate_to_full_names(args.interface_name, interface_type, ii):
-            click.secho(f'[{full_name}]', fg='blue')
-            await run(base_command + [full_name])
+        for interface in await translate_to_full_names(args.interface_name, interface_type, ii):
+            click.secho(f'[{to_string(interface)}]', fg='blue')
+            await run(base_command + [to_string(interface, two_piece=False)])
     elif args.verb in ['list', 'packages']:
         # Pass through to ros2 interface with appropriate args
         command = ii.get_base_command(args.verb)
