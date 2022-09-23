@@ -75,6 +75,24 @@ class InterfaceInterface:
         else:
             return [self.parse_interface(base_s)]
 
+    async def get_interface_definition(self, interface):
+        command = self.get_base_command('show', interface_type=interface.type)
+        if self.version == 1:
+            command.append('-r')  # Raw flag (to preserve comments)
+            command.append(to_string(interface))
+        else:
+            command.append(to_string(interface, two_piece=False))
+        ret, output, err = await get_output(command)
+        if err:
+            click.secho(err, fg='red')
+        return output.strip().split('\n')
+
+    async def display_type(self, interface):
+        definition = await self.get_interface_definition(interface)
+
+        for line in definition:
+            click.secho(line)
+
     async def list_packages(self, interface_type=None):
         # List all packages with any messages
         _, out, _ = await get_output(self.get_base_command('packages', interface_type))
@@ -117,7 +135,15 @@ async def main(interface_type):
     ii = InterfaceInterface(version, distro, interface_type)
 
     if version == 1 and interface_type == 'action':
-        if args.verb in ['show', 'md5']:
+        # ROS 1 does not support action commands natively.
+        if args.verb == 'show':
+            for interface in await ii.translate_to_full_names(args.interface_name):
+                click.secho(f'[{to_string(interface)}]', fg='blue')
+                for component in get_action_parts(interface):
+                    await ii.display_type(component)
+                    if not component.name.endswith('Feedback'):
+                        click.secho('---', fg='blue')
+        elif args.verb == 'md5':
             interface = ii.parse_interface(args.interface_name)
             for component in get_action_parts(interface):
                 name = to_string(component)
@@ -135,10 +161,9 @@ async def main(interface_type):
             pkgs = set(interface.package for interface in await ii.list_actions())
             print('\n'.join(sorted(pkgs)))
     elif args.verb == 'show':
-        base_command = ii.get_base_command(args.verb)
         for interface in await ii.translate_to_full_names(args.interface_name):
             click.secho(f'[{to_string(interface)}]', fg='blue')
-            await run(base_command + [to_string(interface, two_piece=False)])
+            await ii.display_type(interface)
     elif args.verb in ['list', 'packages']:
         # Pass through to ros2 interface with appropriate args
         command = ii.get_base_command(args.verb, filter_flag=True)
