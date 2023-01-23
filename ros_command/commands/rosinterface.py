@@ -112,12 +112,14 @@ class InterfaceInterface:
             click.secho(err, fg='red')
         return output.strip().split('\n')
 
-    async def display_type(self, interface, indentation=0, recurse=False):
+    async def display_type(self, interface, indentation=0, recurse=False, comments=True):
         if interface not in self.interface_definition_cache:
             self.interface_definition_cache[interface] = await self.get_interface_definition(interface)
 
         for line in self.interface_definition_cache[interface]:
             if line == ACTION_LINE:
+                continue
+            elif not comments and line.strip() and line.strip()[0] == '#':
                 continue
 
             click.secho(' ' * indentation, nl=False)
@@ -126,7 +128,7 @@ class InterfaceInterface:
                 line, comment = m.groups()
                 line = line or ''
             else:
-                comment = ''
+                comment = None
 
             sub_interface = None
             m = FIELD_LINE.match(line)
@@ -135,11 +137,12 @@ class InterfaceInterface:
                 if fields['field_type'] not in PRIMITIVES:
                     if '/' not in fields['field_type']:
                         # Determine inferred package
-                        name = fields['file_type']
+                        name = fields['field_type']
                         if name == 'Header':
                             pkg = 'std_msgs'
                         else:
                             pkg = interface.package
+
                         sub_interface = ROSInterface(pkg, 'msg', name)
                         fields['field_type'] = to_string(sub_interface)
                     else:
@@ -156,11 +159,13 @@ class InterfaceInterface:
                 click.secho(line, nl=False, fg='blue')
             else:
                 click.secho(line, nl=False)
-
-            click.secho(comment, fg='green')
+            if not comments:
+                click.secho('')  # Newline
+            else:
+                click.secho(comment, fg='green')
 
             if recurse and sub_interface:
-                await self.display_type(sub_interface, indentation + 4, recurse)
+                await self.display_type(sub_interface, indentation + 4, recurse, comments)
 
     async def list_packages(self, interface_type=None):
         # List all packages with any messages
@@ -189,6 +194,7 @@ async def main(interface_type):
     show_parser = subparsers.add_parser('show', aliases=['info'])
     show_parser.add_argument('interface_name')
     show_parser.add_argument('-r', '--recurse', action='store_true')
+    show_parser.add_argument('-c', '--ignore-comments', action='store_true')
     subparsers.add_parser('list')
     md5_parser = subparsers.add_parser('md5')
     md5_parser.add_argument('interface_name')
@@ -212,7 +218,7 @@ async def main(interface_type):
             for interface in await ii.translate_to_full_names(args.interface_name):
                 click.secho(f'[{to_string(interface)}]', fg='blue')
                 for component in get_action_parts(interface):
-                    await ii.display_type(component, recurse=args.recurse)
+                    await ii.display_type(component, recurse=args.recurse, comments=not args.ignore_comments)
                     if not component.name.endswith('Feedback'):
                         click.secho('---', fg='blue')
         elif args.verb == 'md5':
@@ -236,10 +242,11 @@ async def main(interface_type):
             raise NotImplementedError('Proto is not implemented for ROS 1, although it could be.')
         else:
             raise RuntimeError(f'Unknown verb "{args.verb}" for ROS 1 action')
+
     elif args.verb == 'show':
         for interface in await ii.translate_to_full_names(args.interface_name):
             click.secho(f'[{to_string(interface)}]', fg='blue')
-            await ii.display_type(interface, recurse=args.recurse)
+            await ii.display_type(interface, recurse=args.recurse, comments=not args.ignore_comments)
     elif args.verb in ['list', 'packages']:
         # Pass through to ros2 interface with appropriate args
         command = ii.get_base_command(args.verb, filter_flag=True)
@@ -253,8 +260,10 @@ async def main(interface_type):
             cmd.append(args.package_name)
         elif args.verb == 'proto':
             raise NotImplementedError('Proto is not implemented for ROS 1, although it could be.')
+
         code = await run(cmd)
         exit(code)
+
     elif args.verb == 'package':
         command = ii.get_base_command('package')
         command.append(args.package_name)
