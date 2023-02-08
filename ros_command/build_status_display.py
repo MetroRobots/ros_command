@@ -21,6 +21,7 @@ EMOJIS = {
     'foxy': '🦊',
     'galactic': '🌌',
     'humble': '🤭',
+    'iron': '🔧',
     'rolling': '🎢',
 }
 

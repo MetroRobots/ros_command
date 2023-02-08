@@ -1,4 +1,5 @@
-#!/usr/bin/bash
+# This file is intended to be source-d
+
 FOLDER=$(realpath $( dirname "${BASH_SOURCE[0]}" ))
 export PYTHONPATH=$FOLDER:$PYTHONPATH
 export PATH=$FOLDER/bin:$PATH
