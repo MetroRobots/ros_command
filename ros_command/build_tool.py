@@ -176,6 +176,7 @@ async def get_catkin_tools_graph(workspace_root, package_selection_args):
     pkg_name = None
     build_depends = set()
     run_section = False
+    error_text = ''
 
     def stdout_callback(line):
         nonlocal upstream, pkg_name, build_depends, run_section
@@ -195,8 +196,16 @@ async def get_catkin_tools_graph(workspace_root, package_selection_args):
             dep_name = line.strip()[2:]
             build_depends.add(dep_name)
 
-    await run(['catkin', 'list', '--rdeps', '--unformatted'] + package_selection_args, cwd=workspace_root,
-              stdout_callback=lambda line: stdout_callback(line))
+    def stderr_callback(line):
+        nonlocal error_text
+        error_text += line
+
+    ret = await run(['catkin', 'list', '--rdeps', '--unformatted'] + package_selection_args, cwd=workspace_root,
+                    stdout_callback=lambda line: stdout_callback(line), stderr_callback=stderr_callback)
+
+    if ret != 0 or error_text:
+        click.secho(error_text, fg='red')
+        raise RuntimeError('Error retrieving dependencies!')
 
     if pkg_name:
         upstream[pkg_name] = build_depends
