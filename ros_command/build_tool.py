@@ -184,6 +184,8 @@ async def get_catkin_tools_graph(workspace_root, package_selection_args):
             if pkg_name:
                 upstream[pkg_name] = build_depends
             pkg_name = line.strip()
+            if pkg_name[-1] == ':':
+                pkg_name = pkg_name[:-1]
             build_depends = set()
             run_section = False
         elif line == '  build_depend:\n':
@@ -200,7 +202,11 @@ async def get_catkin_tools_graph(workspace_root, package_selection_args):
         nonlocal error_text
         error_text += line
 
-    ret = await run(['catkin', 'list', '--rdeps', '--unformatted'] + package_selection_args, cwd=workspace_root,
+    cmd = ['catkin', 'list', '--rdeps', '--unformatted']
+    if package_selection_args:
+        cmd += [arg for arg in package_selection_args if arg != '--no-deps']
+
+    ret = await run(cmd, cwd=workspace_root,
                     stdout_callback=lambda line: stdout_callback(line), stderr_callback=stderr_callback)
 
     if ret != 0 or error_text:
