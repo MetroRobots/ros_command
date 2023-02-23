@@ -1,3 +1,4 @@
+argcomplete
 argparse
 blessed
 click
