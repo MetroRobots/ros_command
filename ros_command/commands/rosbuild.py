@@ -1,3 +1,4 @@
+import argcomplete
 import argparse
 import os
 
@@ -14,6 +15,9 @@ async def main():
     parser.add_argument('-b', '--cmake-build-type')
     parser.add_argument('-t', '--test', action='store_true')
     parser.add_argument('-g', '--toggle-graphics', action='store_true')
+
+    argcomplete.autocomplete(parser)
+
     args, unknown_args = parser.parse_known_args()
 
     build_type, workspace_root = get_workspace_root()

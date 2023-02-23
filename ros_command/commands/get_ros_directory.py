@@ -1,3 +1,4 @@
+import argcomplete
 import argparse
 import sys
 
@@ -8,6 +9,9 @@ from ros_command.workspace import BuildType, get_workspace_root
 async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('package', nargs='?')
+
+    argcomplete.autocomplete(parser)
+
     args = parser.parse_args()
 
     build_type, workspace_root = get_workspace_root()

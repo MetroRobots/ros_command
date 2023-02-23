@@ -1,3 +1,4 @@
+import argcomplete
 import argparse
 import collections
 import pathlib
@@ -203,6 +204,8 @@ async def main(interface_type):
     proto_parser = subparsers.add_parser('proto')
     proto_parser.add_argument('interface_name')
     subparsers.add_parser('packages')
+
+    argcomplete.autocomplete(parser)
 
     args = parser.parse_args()
     if args.verb == 'info':  # Alias

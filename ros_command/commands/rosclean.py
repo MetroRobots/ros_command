@@ -1,3 +1,4 @@
+import argcomplete
 import argparse
 import pathlib
 import shutil
@@ -14,7 +15,11 @@ def main():
     parser.add_argument('-c', '--just-checking', action='store_true')
     parser.add_argument('-n', '--no-sizes', action='store_true')
     parser.add_argument('packages', metavar='package', nargs='*')
+
+    argcomplete.autocomplete(parser)
+
     args, unknown_args = parser.parse_known_args()
+
     if args.packages:
         if args.packages[0] == 'check':
             args.just_checking = True
