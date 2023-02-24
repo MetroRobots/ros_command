@@ -5,16 +5,20 @@ import shutil
 
 import click
 
+from ros_command.completion import PackageCompleter
 from ros_command.workspace import BuildType, get_workspace_root
 from ros_command.util import sizeof_fmt
 
 
 def main():
+    build_type, workspace_root = get_workspace_root()
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-y', '--yes-to-all', '--no-confirm', action='store_true')
     parser.add_argument('-c', '--just-checking', action='store_true')
     parser.add_argument('-n', '--no-sizes', action='store_true')
-    parser.add_argument('packages', metavar='package', nargs='*')
+    pack_arg = parser.add_argument('packages', metavar='package', nargs='*')
+    pack_arg.completer = PackageCompleter(workspace_root, local=True)
 
     argcomplete.autocomplete(parser)
 
@@ -26,8 +30,6 @@ def main():
             args.packages.pop(0)
         elif args.packages[0] == 'purge':
             args.packages.pop(0)
-
-    build_type, workspace_root = get_workspace_root()
 
     directories = []
 
