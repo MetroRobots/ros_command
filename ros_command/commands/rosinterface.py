@@ -7,7 +7,8 @@ import re
 import click
 
 from ros_command.command_lib import get_output, run
-from ros_command.workspace import get_ros_version
+from ros_command.completion import PackageCompleter
+from ros_command.workspace import get_ros_version, get_workspace_root
 
 ROSInterface = collections.namedtuple('ROSInterface', ['package', 'type', 'name'])
 
@@ -190,6 +191,7 @@ class InterfaceInterface:
 
 
 async def main(interface_type):
+    build_type, workspace_root = get_workspace_root()
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='verb')
     show_parser = subparsers.add_parser('show', aliases=['info'])
@@ -200,7 +202,7 @@ async def main(interface_type):
     md5_parser = subparsers.add_parser('md5')
     md5_parser.add_argument('interface_name')
     pkg_parser = subparsers.add_parser('package')
-    pkg_parser.add_argument('package_name')
+    pkg_parser.add_argument('package_name').completer = PackageCompleter(workspace_root)
     proto_parser = subparsers.add_parser('proto')
     proto_parser.add_argument('interface_name')
     subparsers.add_parser('packages')
