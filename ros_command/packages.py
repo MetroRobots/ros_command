@@ -32,3 +32,22 @@ def get_all_packages(folder=None, verbose=False):
                 continue
             universe.update(find_catkin_packages_in(path, verbose))
     return universe
+
+
+def find_executables_in_package(package_name, version):
+    if version == 1:
+        from catkin.find_in_workspaces import find_in_workspaces
+        execs = []
+        for exec_folder in find_in_workspaces(['libexec'], package_name):
+            for path in sorted(os.listdir(exec_folder)):
+                full_path = os.path.join(exec_folder, path)
+                if os.access(full_path, os.X_OK):
+                    execs.append(path)
+        return execs
+    else:
+        from ros2pkg.api import get_executable_paths, PackageNotFound
+        try:
+            paths = get_executable_paths(package_name=package_name)
+        except PackageNotFound:
+            return []
+        return [os.path.basename(p) for p in paths]
