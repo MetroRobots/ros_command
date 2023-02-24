@@ -104,6 +104,9 @@ In ROS 1, `rosrun` works the same way as the standard ROS 1 version. In ROS 2, i
 ## roslaunch
 Similar to `rosrun`, `roslaunch` here either just runs ROS 1's `roslaunch` or ROS 2's `ros2 launch`.
 
+## rosstart
+`rosstart` merges the `rosrun` and `roslaunch` command (convenient if you can't remember if a particular functionality was a launch file or executable). When you run a command of the form `rosstart PKG_NAME ABC`, if there is an executable with the name `ABC`, that is `rosrun`, otherwise it is `roslaunch`ed.
+
 
 ## rosclean
 The `rosclean` command works as a hybrid of `rosclean` and `catkin clean`.
