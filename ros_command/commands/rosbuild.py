@@ -2,25 +2,28 @@ import argcomplete
 import argparse
 import os
 
-from ros_command.build_tool import generate_build_command, get_package_selection_args, run_build_command
+from ros_command.build_tool import add_package_selection_args, generate_build_command, get_package_selection_args
+from ros_command.build_tool import run_build_command
 from ros_command.command_lib import run
 from ros_command.workspace import BuildType, get_current_package_name, get_workspace_root
 from ros_command.util import get_config
 
 
 async def main():
+    build_type, workspace_root = get_workspace_root()
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--continue-on-failure', action='store_true')
     parser.add_argument('-j', '--jobs', type=int)
     parser.add_argument('-b', '--cmake-build-type', choices=['Debug', 'Release', 'RelWithDebInfo'])
     parser.add_argument('-t', '--test', action='store_true')
     parser.add_argument('-g', '--toggle-graphics', action='store_true')
+    add_package_selection_args(parser, workspace_root)
 
-    argcomplete.autocomplete(parser)
+    argcomplete.autocomplete(parser, always_complete_options=False)
 
     args, unknown_args = parser.parse_known_args()
 
-    build_type, workspace_root = get_workspace_root()
     if build_type is None:
         ros_version = int(os.environ.get('ROS_VERSION', 1))
         if ros_version == 2:
@@ -30,7 +33,7 @@ async def main():
 
     pkg_name = get_current_package_name()
 
-    unknown_args, package_selection_args = get_package_selection_args(unknown_args, build_type, pkg_name)
+    package_selection_args = get_package_selection_args(args, build_type, pkg_name)
 
     if args.test:
         command = generate_build_command(build_type, unknown_args, package_selection_args,
