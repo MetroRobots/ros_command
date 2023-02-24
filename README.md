@@ -101,6 +101,10 @@ In ROS 1, `rosrun` works the same way as the standard ROS 1 version. In ROS 2, i
 
 `rosdebug` does the same things, except it will insert `--prefix 'gdb -ex run --args'` into the appropriate place to run your node using `gdb`.
 
+## roslaunch
+Similar to `rosrun`, `roslaunch` here either just runs ROS 1's `roslaunch` or ROS 2's `ros2 launch`.
+
+
 ## rosclean
 The `rosclean` command works as a hybrid of `rosclean` and `catkin clean`.
  * With no arguments (`rosclean`) the script will ask whether you want to delete the workspace's `devel/install/build/log` directories as well as the global `~/.ros/log` directory while also printing their sizes.

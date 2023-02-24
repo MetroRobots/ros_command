@@ -51,3 +51,25 @@ def find_executables_in_package(package_name, version):
         except PackageNotFound:
             return []
         return [os.path.basename(p) for p in paths]
+
+
+def find_launch_files_in_package(package_name, version):
+    if version == 1:
+        from catkin.find_in_workspaces import find_in_workspaces
+        launches = []
+        for folder in find_in_workspaces(['share'], package_name):
+            for name, subdirs, files in os.walk(folder):
+                for filepath in files:
+                    if filepath.endswith('.launch'):
+                        launches.append(filepath)
+        return launches
+    else:
+        from ament_index_python.packages import get_package_share_directory
+        from ament_index_python.packages import PackageNotFoundError
+        from ros2launch.api.api import get_launch_file_paths
+        try:
+            package_share_directory = get_package_share_directory(package_name)
+            paths = get_launch_file_paths(path=package_share_directory)
+        except PackageNotFoundError:
+            return []
+        return [os.path.basename(p) for p in paths]
