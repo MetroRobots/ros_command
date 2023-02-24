@@ -80,25 +80,48 @@ class InterfaceInterface:
         else:
             raise RuntimeError(f'Cannot parse interface for "{s}"')
 
-    async def list_interfaces(self, name_filter=None):
+    def list_interfaces(self, name_filter=None):
+        # Implemented with underlying logic to avoid await command
         interfaces = []
+        if self.version == 1:
+            import rospkg
+            from rosmsg import _list_types, _get_package_paths
+            import os
 
-        def out_cb(line):
-            if line and line[0] != ' ' and line.endswith(':\n'):
-                return
-            interface = self.parse_interface(line.strip())
-            if not name_filter or interface.name == name_filter:
-                interfaces.append(interface)
+            rospack = rospkg.RosPack()
+            pkgs = rospack.list()
+            for pkg in pkgs:
+                package_paths = _get_package_paths(pkg, rospack)
+                for package_path in package_paths:
+                    d = os.path.join(package_path, self.interface_type)
+                    if not os.path.isdir(d):
+                        continue
+                    for i_name in _list_types(d, self.interface_type, '.' + self.interface_type):
+                        interface = ROSInterface(pkg, self.interface_type, i_name)
+                        interfaces.append(interface)
+        else:
+            from rosidl_runtime_py import get_interfaces
+            for pkg, pkg_interfaces in get_interfaces().items():
+                for pkg_interface in pkg_interfaces:
+                    i_type, i_name = pkg_interface.split('/')
+                    interface = ROSInterface(pkg, i_type, i_name)
+                    interfaces.append(interface)
 
-        await run(self.get_base_command('list', filter_flag=True), stdout_callback=out_cb)
-        return interfaces
+        if name_filter is None:
+            return interfaces
 
-    async def translate_to_full_names(self, base_s):
+        filtered = []
+        for interface in interfaces:
+            if interface.name == name_filter:
+                filtered.append(interface)
+        return filtered
+
+    def translate_to_full_names(self, base_s):
         pieces = base_s.split('/')
 
         # If no /, then only the interface name is specified and list all the interfaces that have the same name
         if len(pieces) == 1:
-            return await self.list_interfaces(base_s)
+            return self.list_interfaces(base_s)
         else:
             return [self.parse_interface(base_s)]
 
@@ -190,21 +213,56 @@ class InterfaceInterface:
         return sorted(results)
 
 
+class InterfaceCompleter:
+    def __init__(self, interface_interface):
+        self.interface_interface = interface_interface
+
+    def __call__(self, prefix, **kwargs):
+        matches = []
+        for interface in self.interface_interface.list_interfaces():
+            if self.interface_interface.version == 1:
+                full_name = f'{interface.package}/{interface.name}'
+            else:
+                full_name = f'{interface.package}/{interface.type}/{interface.name}'
+
+            if prefix:
+                if interface.name.startswith(prefix):
+                    # If the name matches the prefix, add interface by name
+                    matches.append(interface.name)
+                elif full_name.startswith(prefix):
+                    # If the full name matches the prefix, add the interface's full name
+                    matches.append(full_name)
+
+                # if the prefix exists and does not match either condition, add nothing
+            else:
+                # If there is no prefix, add the interface by name and full_name
+                matches.append(interface.name)
+                matches.append(full_name)
+
+        return matches
+
+
 async def main(interface_type):
     build_type, workspace_root = get_workspace_root()
+    version, distro = get_ros_version()
+
+    ii = InterfaceInterface(version, distro, interface_type)
+
+    interface_completer = InterfaceCompleter(ii)
+
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='verb')
     show_parser = subparsers.add_parser('show', aliases=['info'])
-    show_parser.add_argument('interface_name')
+    show_parser.add_argument('interface_name').completer = interface_completer
     show_parser.add_argument('-r', '--recurse', action='store_true')
     show_parser.add_argument('-c', '--ignore-comments', action='store_true')
     subparsers.add_parser('list')
     md5_parser = subparsers.add_parser('md5')
-    md5_parser.add_argument('interface_name')
+    md5_parser.add_argument('interface_name').completer = interface_completer
     pkg_parser = subparsers.add_parser('package')
     pkg_parser.add_argument('package_name').completer = PackageCompleter(workspace_root)
     proto_parser = subparsers.add_parser('proto')
-    proto_parser.add_argument('interface_name')
+    proto_parser.add_argument('interface_name').completer = interface_completer
     subparsers.add_parser('packages')
 
     argcomplete.autocomplete(parser)
@@ -213,14 +271,10 @@ async def main(interface_type):
     if args.verb == 'info':  # Alias
         args.verb = 'show'
 
-    version, distro = get_ros_version()
-
-    ii = InterfaceInterface(version, distro, interface_type)
-
     if version == 1 and interface_type == 'action':
         # ROS 1 does not support action commands natively.
         if args.verb == 'show':
-            for interface in await ii.translate_to_full_names(args.interface_name):
+            for interface in ii.translate_to_full_names(args.interface_name):
                 click.secho(f'[{to_string(interface)}]', fg='blue')
                 for component in get_action_parts(interface):
                     await ii.display_type(component, recurse=args.recurse, comments=not args.ignore_comments)
@@ -249,7 +303,7 @@ async def main(interface_type):
             raise RuntimeError(f'Unknown verb "{args.verb}" for ROS 1 action')
 
     elif args.verb == 'show':
-        for interface in await ii.translate_to_full_names(args.interface_name):
+        for interface in ii.translate_to_full_names(args.interface_name):
             click.secho(f'[{to_string(interface)}]', fg='blue')
             await ii.display_type(interface, recurse=args.recurse, comments=not args.ignore_comments)
     elif args.verb in ['list', 'packages']:
@@ -279,7 +333,7 @@ async def main(interface_type):
             if interface.type == interface_type:
                 print(to_string(interface))
     elif args.verb == 'proto':
-        full_names = await ii.translate_to_full_names(args.interface_name)
+        full_names = ii.translate_to_full_names(args.interface_name)
         if not full_names:
             click.secho(f'Cannot find interface "{args.interface_name}"', fg='red')
             exit(-1)
