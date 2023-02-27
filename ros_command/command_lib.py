@@ -37,8 +37,8 @@ async def run(command, stdout_callback=None, stderr_callback=None, cwd=None):
     if stderr_callback is None:
         stderr_callback = _default_stderr_callback
 
-    await asyncio.wait([_read_stream(process.stdout, stdout_callback),
-                        _read_stream(process.stderr, stderr_callback)])
+    await asyncio.wait([asyncio.create_task(_read_stream(process.stdout, stdout_callback)),
+                        asyncio.create_task(_read_stream(process.stderr, stderr_callback))])
 
     return await process.wait()
 
