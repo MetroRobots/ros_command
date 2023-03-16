@@ -1,4 +1,3 @@
-import argparse
 import collections
 import re
 import sys
@@ -8,6 +7,7 @@ import click
 
 from ros_command.build_status_display import BuildStatusDisplay, STATUS_COLORS
 from ros_command.command_lib import get_output, run
+from ros_command.completion import PackageCompleter
 from ros_command.workspace import BuildType
 from ros_command.util import get_config
 
@@ -220,14 +220,17 @@ async def get_catkin_tools_graph(workspace_root, package_selection_args):
     return upstream
 
 
-def get_package_selection_args(argv, build_type, pkg_name):
-    parser = argparse.ArgumentParser()
+def add_package_selection_args(parser, workspace_root=None):
+    completer = PackageCompleter(workspace_root, local=True)
+
     parser.add_argument('--this', action='store_true')
     parser.add_argument('-n', '--no-deps', action='store_true')
-    parser.add_argument('-s', '--skip-packages', nargs='+')
-    parser.add_argument('include_packages', metavar='include_package', nargs='*')
-    args, remaining_argv = parser.parse_known_args(argv)
+    parser.add_argument('-s', '--skip-packages', nargs='+').completer = completer
+    parser.add_argument('include_packages', metavar='include_package', nargs='*').completer = completer
+    return parser
 
+
+def get_package_selection_args(args, build_type, pkg_name):
     package_selection_args = []
 
     if args.this and not pkg_name:
@@ -272,7 +275,7 @@ def get_package_selection_args(argv, build_type, pkg_name):
             pkg_s = ';'.join(args.skip_packages)
             package_selection_args.append(f'-DCATKIN_BLACKLIST_PACKAGES="{pkg_s}"')
 
-    return remaining_argv, package_selection_args
+    return package_selection_args
 
 
 def generate_build_command(build_type, unknown_args, package_selection_args=[], continue_on_failure=False, jobs=None,

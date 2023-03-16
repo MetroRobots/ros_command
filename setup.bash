@@ -42,3 +42,9 @@ source_ros()
         source $LOCATION
     fi
 }
+
+# Register Tab Completion
+for f in $FOLDER/bin/*
+do
+    eval "$(register-python-argcomplete3 $(basename ${f}))"
+done
