@@ -17,6 +17,7 @@ STATUS_COLORS = {
 EMOJIS = {
     'melodic': '🎶',
     'noetic': '🤔',
+    'debian': '🍥',
     'eloquent': '🗣',
     'foxy': '🦊',
     'galactic': '🌌',
