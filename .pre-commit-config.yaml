@@ -35,3 +35,4 @@ repos:
   hooks:
   - id: codespell
     args: ['--write-changes']
+autoupdate_schedule: quarterly
