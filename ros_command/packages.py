@@ -73,3 +73,25 @@ def find_launch_files_in_package(package_name, version):
         except PackageNotFoundError:
             return []
         return [os.path.basename(p) for p in paths]
+
+
+def get_launch_file_arguments(package_name, launch_file_name, existing_arg_values, version):
+    existing_args = {a.split(':=')[0] for a in existing_arg_values}
+
+    try:
+        if version == 1:
+            import roslaunch.arg_dump as roslaunch_arg_dump
+            from roslaunch import rlutil
+
+            args = rlutil.resolve_launch_arguments([package_name, launch_file_name])
+            arg_keys = sorted(roslaunch_arg_dump.get_args(args).keys())
+        else:
+            from ros2launch.api import get_share_file_path_from_package
+            from launch.launch_description_sources import get_launch_description_from_any_launch_file
+
+            path = get_share_file_path_from_package(package_name=package_name, file_name=launch_file_name)
+            launch_description = get_launch_description_from_any_launch_file(path)
+            arg_keys = sorted(arg.name for arg in launch_description.get_launch_arguments())
+        return [a + ':=' for a in arg_keys if a not in existing_args]
+    except Exception:
+        return []

@@ -2,7 +2,7 @@ import argcomplete
 import argparse
 
 from ros_command.command_lib import run
-from ros_command.completion import PackageCompleter, LaunchFileCompleter
+from ros_command.completion import PackageCompleter, LaunchArgCompleter, LaunchFileCompleter
 from ros_command.workspace import get_ros_version, get_workspace_root
 
 
@@ -13,7 +13,7 @@ async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('package_name').completer = PackageCompleter(workspace_root)
     parser.add_argument('launch_file_name').completer = LaunchFileCompleter(version)
-    parser.add_argument('argv', nargs=argparse.REMAINDER)
+    parser.add_argument('argv', nargs=argparse.REMAINDER).completer = LaunchArgCompleter(workspace_root, version)
 
     argcomplete.autocomplete(parser, always_complete_options=False)
     args = parser.parse_args()
