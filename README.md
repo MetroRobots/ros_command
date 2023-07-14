@@ -111,6 +111,15 @@ The `rosclean` command works as a hybrid of `rosclean` and `catkin clean`.
 
 You can also throw the word `purge` at the beginning just to mirror the ROS 1 `rosclean` more closely.
 
+## rosbag
+The `rosbag` command provides some functionality missing from ROS 2.
+
+ * `rosbag compress` and `rosbag decompress` as single commands as opposed to needing to [create a separate configuration file](https://github.com/ros2/rosbag2/blob/698b8eebafaf8a2a494e5f9eb6bc33d2085948a3/README.md#converting-bags)
+ * `rosbag info` but the topic information is aligned nicely.
+ * `rosbag record` with topic completion.
+ * `rosbag play` with `--clock` option (which is not available in all distros)
+ * `rosbag reindex` to regenerate the `metadata.yaml` file for sqlite3-based bags.
+
 # Configuration
 Users may change the default behavior of `ros_command` by putting settings in yaml files in two places.
  * `ros_command.yaml` in the workspace root (highest precedence)
