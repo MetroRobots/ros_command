@@ -23,7 +23,7 @@ repos:
   hooks:
   - id: autopep8
 - repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
+  rev: 6.1.0
   hooks:
   - id: flake8
 - repo: https://github.com/lovesegfault/beautysh
@@ -31,8 +31,10 @@ repos:
   hooks:
   - id: beautysh
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.4
+  rev: v2.2.5
   hooks:
   - id: codespell
-    args: ['--write-changes']
-autoupdate_schedule: quarterly
+    args:
+    - --write-changes
+ci:
+  autoupdate_schedule: quarterly
