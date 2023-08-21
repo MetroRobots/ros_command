@@ -35,6 +35,7 @@ async def main(debug=False):
     play_parser = subparsers.add_parser('play')
     play_parser.add_argument('bagfile', type=pathlib.Path)
     play_parser.add_argument('--clock', action='store_true')
+    play_parser.add_argument('-r', '--rate', type=float, default=1.0)
 
     record_parser = subparsers.add_parser('record')
     record_parser.add_argument('topics', metavar='topic', nargs='*').completer = TopicCompleter(version)
@@ -148,6 +149,7 @@ async def main(debug=False):
 
         type_map = {tmeta.name: tmeta.type for tmeta in topic_types}
         prev_time = None
+        publish_rate_mult = 1 / args.rate
         while reader.has_next():
             (topic, rawdata, timestamp) = reader.read_next()
             ftime = timestamp / 1e9
@@ -164,7 +166,7 @@ async def main(debug=False):
             pub.publish(msg)
 
             if prev_time:
-                delta = ftime - prev_time
+                delta = (ftime - prev_time) * publish_rate_mult
                 time.sleep(delta)
             prev_time = ftime
     elif args.verb == 'reindex':
