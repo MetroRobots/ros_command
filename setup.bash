@@ -1,15 +1,15 @@
 # This file is intended to be source-d
 
-FOLDER=$(realpath $( dirname "${BASH_SOURCE[0]}" ))
-export PYTHONPATH=$FOLDER:$PYTHONPATH
-export PATH=$FOLDER/bin:$PATH
+export ROS_COMMAND_ROOT=$(realpath $( dirname "${BASH_SOURCE[0]}" ))
+export PYTHONPATH=$ROS_COMMAND_ROOT:$PYTHONPATH
+export PATH=$ROS_COMMAND_ROOT/bin:$PATH
 
 # roscd is not a Python script because Python cannot change the directory
 # https://stackoverflow.com/questions/18166977/cd-to-dir-after-exiting-script-system-independent-way-purely-in-python
 # Attempt to implement roscd upstream: https://github.com/ros2/ros2cli/pull/75
 
 # Only define roscd when it is not defined, i.e. don't overwrite the ROS 1 version
-if ! $(type -t roscd) ; then
+if [[ -z "$(type -t roscd)" ]]; then
     roscd()
     {
         if [[ -z "${ROS_VERSION}" ]]; then
@@ -44,7 +44,7 @@ source_ros()
 }
 
 # Register Tab Completion
-for f in $FOLDER/bin/*
+for f in $ROS_COMMAND_ROOT/bin/*
 do
     eval "$(register-python-argcomplete3 $(basename ${f}))"
 done
