@@ -51,3 +51,47 @@ def find_executables_in_package(package_name, version):
         except PackageNotFound:
             return []
         return [os.path.basename(p) for p in paths]
+
+
+def find_launch_files_in_package(package_name, version):
+    if version == 1:
+        from catkin.find_in_workspaces import find_in_workspaces
+        launches = []
+        for folder in find_in_workspaces(['share'], package_name):
+            for name, subdirs, files in os.walk(folder):
+                for filepath in files:
+                    if filepath.endswith('.launch'):
+                        launches.append(filepath)
+        return launches
+    else:
+        from ament_index_python.packages import get_package_share_directory
+        from ament_index_python.packages import PackageNotFoundError
+        from ros2launch.api.api import get_launch_file_paths
+        try:
+            package_share_directory = get_package_share_directory(package_name)
+            paths = get_launch_file_paths(path=package_share_directory)
+        except PackageNotFoundError:
+            return []
+        return [os.path.basename(p) for p in paths]
+
+
+def get_launch_file_arguments(package_name, launch_file_name, existing_arg_values, version):
+    existing_args = {a.split(':=')[0] for a in existing_arg_values}
+
+    try:
+        if version == 1:
+            import roslaunch.arg_dump as roslaunch_arg_dump
+            from roslaunch import rlutil
+
+            args = rlutil.resolve_launch_arguments([package_name, launch_file_name])
+            arg_keys = sorted(roslaunch_arg_dump.get_args(args).keys())
+        else:
+            from ros2launch.api import get_share_file_path_from_package
+            from launch.launch_description_sources import get_launch_description_from_any_launch_file
+
+            path = get_share_file_path_from_package(package_name=package_name, file_name=launch_file_name)
+            launch_description = get_launch_description_from_any_launch_file(path)
+            arg_keys = sorted(arg.name for arg in launch_description.get_launch_arguments())
+        return [a + ':=' for a in arg_keys if a not in existing_args]
+    except Exception:
+        return []
