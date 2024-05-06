@@ -36,6 +36,7 @@ async def main(debug=False):
     play_parser.add_argument('bagfile', type=pathlib.Path)
     play_parser.add_argument('--clock', action='store_true')
     play_parser.add_argument('-r', '--rate', type=float, default=1.0)
+    play_parser.add_argument('-t', '--topics', metavar='topic', nargs='+')
 
     record_parser = subparsers.add_parser('record')
     record_parser.add_argument('topics', metavar='topic', nargs='*').completer = TopicCompleter(version)
@@ -110,7 +111,7 @@ async def main(debug=False):
         await run(['ros2', 'bag', 'record'] + args.topics)
     elif args.verb == 'play':
         from rosbag2_py import SequentialReader
-        from rosbag2_py import StorageOptions, ConverterOptions
+        from rosbag2_py import StorageOptions, StorageFilter, ConverterOptions
         from rosgraph_msgs.msg import Clock
         from rosidl_runtime_py.utilities import get_message
         import rclpy
@@ -129,9 +130,15 @@ async def main(debug=False):
         reader.open(StorageOptions(str(args.bagfile), 'sqlite3'),
                     ConverterOptions(serialization_format, serialization_format))
 
+        if args.topics:
+            storage_filter = StorageFilter(topics=args.topics)
+            reader.set_filter(storage_filter)
+
         topic_types = reader.get_all_topics_and_types()
         pubs = {}
         for tmeta in topic_types:
+            if args.topics and tmeta.name not in args.topics:
+                continue
             pkg, itype, name = tmeta.type.split('/')
             module = importlib.import_module(f'{pkg}.{itype}')
             if tmeta.offered_qos_profiles:
