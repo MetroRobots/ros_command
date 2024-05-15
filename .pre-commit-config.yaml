@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v4.5.0
   hooks:
   - id: check-added-large-files
   - id: check-case-conflict
@@ -18,12 +18,12 @@ repos:
   - id: requirements-txt-fixer
   - id: check-shebang-scripts-are-executable
   - id: check-yaml
-- repo: https://github.com/pre-commit/mirrors-autopep8
-  rev: v2.0.2
+- repo: https://github.com/hhatto/autopep8
+  rev: v2.1.0
   hooks:
   - id: autopep8
 - repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
+  rev: 7.0.0
   hooks:
   - id: flake8
 - repo: https://github.com/lovesegfault/beautysh
@@ -31,8 +31,10 @@ repos:
   hooks:
   - id: beautysh
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.4
+  rev: v2.2.6
   hooks:
   - id: codespell
-    args: ['--write-changes']
-autoupdate_schedule: quarterly
+    args:
+    - --write-changes
+ci:
+  autoupdate_schedule: quarterly
