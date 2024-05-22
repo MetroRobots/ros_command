@@ -1,6 +1,6 @@
 import sys
 
-from ros_command.workspace import BuildType, get_workspace_root
+from betsy_ros import BuildType, get_workspace_root
 
 
 def main():

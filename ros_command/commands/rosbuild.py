@@ -2,10 +2,11 @@ import argcomplete
 import argparse
 import os
 
+from betsy_ros import BuildType, get_package_name_from_path, get_workspace_root
+
 from ros_command.build_tool import add_package_selection_args, generate_build_command, get_package_selection_args
 from ros_command.build_tool import run_build_command
 from ros_command.command_lib import run
-from ros_command.workspace import BuildType, get_current_package_name, get_workspace_root
 from ros_command.util import get_config
 
 
@@ -31,7 +32,7 @@ async def main():
         else:
             build_type = BuildType.CATKIN_TOOLS  # Defaults to catkin tools
 
-    pkg_name = get_current_package_name()
+    pkg_name = get_package_name_from_path()
 
     package_selection_args = get_package_selection_args(args, build_type, pkg_name)
 

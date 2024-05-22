@@ -5,8 +5,9 @@ import shutil
 
 import click
 
+from betsy_ros import BuildType, get_workspace_root
+
 from ros_command.completion import PackageCompleter
-from ros_command.workspace import BuildType, get_workspace_root
 from ros_command.util import sizeof_fmt
 
 
