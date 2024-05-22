@@ -2,9 +2,10 @@ import argcomplete
 import argparse
 import sys
 
+from betsy_ros import BuildType, get_workspace_root
+
 from ros_command.command_lib import get_output
 from ros_command.completion import PackageCompleter
-from ros_command.workspace import BuildType, get_workspace_root
 
 
 async def main():

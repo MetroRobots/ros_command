@@ -5,10 +5,11 @@ import time
 
 import click
 
+from betsy_ros import BuildType
+
 from ros_command.build_status_display import BuildStatusDisplay, STATUS_COLORS
 from ros_command.command_lib import get_output, run
 from ros_command.completion import PackageCompleter
-from ros_command.workspace import BuildType
 from ros_command.util import get_config
 
 
