@@ -23,6 +23,7 @@ EMOJIS = {
     'galactic': '🌌',
     'humble': '🤭',
     'iron': '🔧',
+    'jazzy': '🎷',
     'rolling': '🎢',
 }
 
