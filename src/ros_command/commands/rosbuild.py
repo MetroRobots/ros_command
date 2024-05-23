@@ -1,5 +1,6 @@
 import argcomplete
 import argparse
+import asyncio
 import os
 
 from betsy_ros import BuildType, get_package_name_from_path, get_workspace_root
@@ -55,3 +56,9 @@ async def main():
     if sound_path:
         await run(['aplay', '-q', sound_path])
     exit(code)
+
+
+def main_rosbuild():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main())

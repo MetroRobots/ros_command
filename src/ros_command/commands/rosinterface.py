@@ -1,5 +1,6 @@
 import argcomplete
 import argparse
+import asyncio
 import pathlib
 import re
 
@@ -309,3 +310,21 @@ async def main(interface_type):
         await run(command)
     else:
         raise NotImplementedError('No equivalent md5 command in ros2')
+
+
+def main_msg():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main('msg'))
+
+
+def main_srv():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main('srv'))
+
+
+def main_action():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main('action'))

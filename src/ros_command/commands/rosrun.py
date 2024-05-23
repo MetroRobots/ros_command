@@ -1,5 +1,6 @@
 import argcomplete
 import argparse
+import asyncio
 
 from betsy_ros import get_ros_version, get_workspace_root
 
@@ -36,3 +37,15 @@ async def main(debug=False):
 
     code = await run(command)
     exit(code)
+
+
+def main_rosrun():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main())
+
+
+def main_rosdebug():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main(debug=True))
