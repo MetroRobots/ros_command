@@ -18,13 +18,19 @@ This tool uses Python 3.
 
     git clone git@github.com:MetroRobots/ros_command.git
     cd ros_command
-    sudo pip3 install -r requirements.txt
+    sudo pip3 install .
 
-It also uses some BASH scripts. It is recommended that you add `source /path/to/ros_command/setup.bash` to your `.bashrc`. This will add the executable scripts to your `PATH` and add the library to your `PYTHONPATH`.
+It also uses some BASH scripts. It is recommended that you add `source $(get_ros_command_bash)` to your `.bashrc`. This will enable the bash-only commands (`roscd` and `source_ros`) and enable tab completion of the other commands.
 
-    echo "source $PWD/setup.bash" >> ~/.bashrc
+    echo "source \$(get_ros_command_bash)" >> ~/.bashrc
 
-Note that if you are using ROS 1, it is recommended that you source the setup AFTER you source ROS. Many of the commands in this library have the exact same syntax as their native ROS 1 counterparts, so sourcing after ROS gives these scripts priority.
+Note that if you are using ROS 1, by default the native ROS commands will take precedence over the `ros_command` versions. You can test this by running `which rosmsg`. If it returns `/opt/ros/$ROS_DISTRO/bin/rosmsg` then it is the native version. If it returns `/usr/local/bin/rosmsg` then it is the `ros_command` version. This is likely because `/opt/ros/$ROS_DISTRO/bin` comes earlier in the `$PATH` than `/usr/local/bin`. You can fix this by changing your `$PATH`, i.e.
+
+    export PATH=/usr/local/bin:$PATH
+
+However, this may have additional consequences and should be done carefully.
+
+(If you don't do this for ROS 1, then the commands that do not share a name with native ROS commands (i.e. `rosbuild`) will still work fine.)
 
 # Commands
 

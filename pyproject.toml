@@ -28,6 +28,7 @@ dynamic = ["version"]
 
 [project.scripts]
 get_current_setup_bash = "ros_command.commands.get_current_setup_bash:main"
+get_ros_command_bash = "ros_command.commands.get_ros_command_bash:main"
 get_ros_directory = "ros_command.commands.get_ros_directory:main_get_dir"
 rosaction = "ros_command.commands.rosinterface:main_action"
 rosbuild = "ros_command.commands.rosbuild:main_rosbuild"

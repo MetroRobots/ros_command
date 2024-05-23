@@ -1,9 +1,5 @@
 # This file is intended to be source-d
 
-FOLDER=$(realpath $( dirname "${BASH_SOURCE[0]}" ))
-export PYTHONPATH=$FOLDER:$PYTHONPATH
-export PATH=$FOLDER/bin:$PATH
-
 # roscd is not a Python script because Python cannot change the directory
 # https://stackoverflow.com/questions/18166977/cd-to-dir-after-exiting-script-system-independent-way-purely-in-python
 # Attempt to implement roscd upstream: https://github.com/ros2/ros2cli/pull/75
@@ -43,8 +39,12 @@ source_ros()
     fi
 }
 
-# Register Tab Completion
-for f in $FOLDER/bin/*
-do
-    eval "$(register-python-argcomplete3 $(basename ${f}))"
-done
+eval "$(register-python-argcomplete3 get_ros_directory)"
+eval "$(register-python-argcomplete3 rosaction)"
+eval "$(register-python-argcomplete3 rosbuild)"
+eval "$(register-python-argcomplete3 rosclean)"
+eval "$(register-python-argcomplete3 rosdebug)"
+eval "$(register-python-argcomplete3 rosdep_install)"
+eval "$(register-python-argcomplete3 rosmsg)"
+eval "$(register-python-argcomplete3 rosrun)"
+eval "$(register-python-argcomplete3 rossrv)"
