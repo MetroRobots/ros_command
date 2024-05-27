@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ros_command"
+description = "Unifying the ROS command line tools"
+readme = "README.md"
+authors = [
+  { name = "David V. Lu!!", email = "davidvlu@gmail.com" },
+]
+maintainers = [
+  { name = "David V. Lu!!", email = "davidvlu@gmail.com" },
+]
+
+dependencies = [
+  "argcomplete",
+  "argparse",
+  "betsy-ros",
+  "blessed",
+  "click",
+  "pyyaml",
+]
+
+requires-python = ">=3.8"
+
+dynamic = ["version"]
+
+[project.scripts]
+get_current_setup_bash = "ros_command.commands.get_current_setup_bash:main"
+get_ros_command_bash = "ros_command.commands.get_ros_command_bash:main"
+get_ros_directory = "ros_command.commands.get_ros_directory:main_get_dir"
+rosaction = "ros_command.commands.rosinterface:main_action"
+rosbuild = "ros_command.commands.rosbuild:main_rosbuild"
+rosclean = "ros_command.commands.rosclean:main"
+rosdebug = "ros_command.commands.rosrun:main_rosdebug"
+rosdep_install = "ros_command.commands.rosdep_install:main_rosdep"
+rosexecute = "ros_command.commands.rosexecute:main_execute"
+roslaunch = "ros_command.commands.roslaunch:main_launch"
+rosmsg = "ros_command.commands.rosinterface:main_msg"
+rosrun = "ros_command.commands.rosrun:main_rosrun"
+rossrv = "ros_command.commands.rosinterface:main_srv"
+
+[project.urls]
+Homepage = "https://github.com/MetroRobots/ros_command"
+"Bug Tracker" = "https://github.com/MetroRobots/ros_command/issues"
+
+[tool.hatch]
+version.source = "vcs"
+build.hooks.vcs.version-file = "src/ros_command/_version.py"

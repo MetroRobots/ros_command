@@ -1,9 +1,11 @@
 import argcomplete
 import argparse
+import asyncio
+
+from betsy_ros import get_ros_version, get_workspace_root
 
 from ros_command.command_lib import run
 from ros_command.completion import PackageCompleter, LaunchArgCompleter, LaunchFileCompleter
-from ros_command.workspace import get_ros_version, get_workspace_root
 
 
 async def main():
@@ -30,3 +32,9 @@ async def main():
 
     code = await run(command)
     exit(code)
+
+
+def main_launch():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main())

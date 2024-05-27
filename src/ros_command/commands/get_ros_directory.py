@@ -1,5 +1,6 @@
 import argcomplete
 import argparse
+import asyncio
 import sys
 
 from betsy_ros import BuildType, get_workspace_root
@@ -43,3 +44,9 @@ async def main():
         # ROS 1
         _, out, _ = await get_output(['rospack', 'find', args.package])
         print(out.strip())
+
+
+def main_get_dir():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main())
