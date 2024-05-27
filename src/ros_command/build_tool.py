@@ -9,7 +9,7 @@ from betsy_ros import BuildType
 
 from ros_command.build_status_display import BuildStatusDisplay, STATUS_COLORS
 from ros_command.command_lib import get_output, run
-from ros_command.completion import PackageCompleter
+from ros_command.completion import LocalPackageCompleter
 from ros_command.util import get_config
 
 
@@ -222,7 +222,7 @@ async def get_catkin_tools_graph(workspace_root, package_selection_args):
 
 
 def add_package_selection_args(parser, workspace_root=None):
-    completer = PackageCompleter(workspace_root, local=True)
+    completer = LocalPackageCompleter(workspace_root)
 
     parser.add_argument('--this', action='store_true')
     parser.add_argument('-n', '--no-deps', action='store_true')
