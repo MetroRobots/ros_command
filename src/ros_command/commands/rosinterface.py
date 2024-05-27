@@ -10,7 +10,7 @@ from betsy_ros import ROSInterface, get_ros_version, get_workspace_root
 from betsy_ros.interfaces import list_interfaces as list_ros_interfaces  # Avoid backwards incompatible name
 
 from ros_command.command_lib import get_output, run
-from ros_command.completion import PackageCompleter
+from ros_command.completion import PackageCompleter, Completer
 
 
 ACTION_PARTS = ['Goal', 'Result', 'Feedback']
@@ -175,17 +175,22 @@ class InterfaceInterface:
         return sorted(results)
 
 
-class InterfaceCompleter:
-    def __init__(self, interface_interface):
+class InterfaceCompleter(Completer):
+    def __init__(self, workspace_root, interface_interface):
+        super().__init__(workspace_root, interface_interface.version)
         self.interface_interface = interface_interface
 
-    def __call__(self, prefix, **kwargs):
+    def get_cache_keys(self, **kwargs):
+        return [str(self.workspace_root), self.interface_interface.interface_type]
+
+    def get_completions(self, **kwargs):
+        return [interface.to_string(two_part=self.version == 1)
+                for interface in self.interface_interface.list_interfaces()]
+
+    def filter_values(self, values, prefix=None, **kwargs):
         matches = []
-        for interface in self.interface_interface.list_interfaces():
-            if self.interface_interface.version == 1:
-                full_name = f'{interface.package}/{interface.name}'
-            else:
-                full_name = f'{interface.package}/{interface.type}/{interface.name}'
+        for full_name in values:
+            interface = ROSInterface.from_string(full_name, interface_type=self.interface_interface.interface_type)
 
             if prefix:
                 if interface.name.startswith(prefix):
@@ -210,7 +215,7 @@ async def main(interface_type):
 
     ii = InterfaceInterface(version, distro, interface_type)
 
-    interface_completer = InterfaceCompleter(ii)
+    interface_completer = InterfaceCompleter(workspace_root, ii)
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='verb')

@@ -14,8 +14,8 @@ async def main(debug=False):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true')
-    parser.add_argument('package_name').completer = PackageCompleter(workspace_root)
-    parser.add_argument('executable_name').completer = ExecutableNameCompleter(version)
+    parser.add_argument('package_name').completer = PackageCompleter(workspace_root, version)
+    parser.add_argument('executable_name').completer = ExecutableNameCompleter(workspace_root, version)
     parser.add_argument('argv', nargs=argparse.REMAINDER)
 
     argcomplete.autocomplete(parser, always_complete_options=False)

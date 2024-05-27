@@ -5,19 +5,19 @@ import asyncio
 from betsy_ros import get_ros_version, get_workspace_root
 
 from ros_command.command_lib import run
-from ros_command.completion import PackageCompleter
-from ros_command.packages import find_executables_in_package, find_launch_files_in_package
+from ros_command.completion import PackageCompleter, ExecutableNameCompleter, LaunchFileCompleter
+from ros_command.packages import find_executables_in_package
 
 
 class StartCompleter:
-    def __init__(self, version):
+    def __init__(self, workspace_root=None, version=None):
+        self.workspace_root = workspace_root
         self.version = version
+        self.enc = ExecutableNameCompleter(workspace_root, version)
+        self.lfc = LaunchFileCompleter(workspace_root, version)
 
-    def __call__(self, parsed_args, **kwargs):
-        ret = []
-        ret += find_executables_in_package(parsed_args.package_name, self.version)
-        ret += find_launch_files_in_package(parsed_args.package_name, self.version)
-        return ret
+    def __call__(self, **kwargs):
+        return self.enc(**kwargs) + self.lfc(**kwargs)
 
 
 async def main():
@@ -25,8 +25,8 @@ async def main():
     version, distro = get_ros_version()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('package_name').completer = PackageCompleter(workspace_root)
-    parser.add_argument('executable_or_launchfile').completer = StartCompleter(version)
+    parser.add_argument('package_name').completer = PackageCompleter(workspace_root, version)
+    parser.add_argument('executable_or_launchfile').completer = StartCompleter(workspace_root, version)
     parser.add_argument('argv', nargs=argparse.REMAINDER)
 
     argcomplete.autocomplete(parser, always_complete_options=False)
