@@ -7,7 +7,7 @@ import click
 
 from betsy_ros import BuildType, get_workspace_root
 
-from ros_command.completion import PackageCompleter
+from ros_command.completion import LocalPackageCompleter
 from ros_command.util import sizeof_fmt
 
 
@@ -19,7 +19,7 @@ def main():
     parser.add_argument('-c', '--just-checking', action='store_true')
     parser.add_argument('-n', '--no-sizes', action='store_true')
     pack_arg = parser.add_argument('packages', metavar='package', nargs='*')
-    pack_arg.completer = PackageCompleter(workspace_root, local=True)
+    pack_arg.completer = LocalPackageCompleter(workspace_root)
 
     argcomplete.autocomplete(parser)
 

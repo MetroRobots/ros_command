@@ -3,15 +3,19 @@ from ros_command.packages import find_executables_in_package, find_launch_files_
 
 
 class PackageCompleter:
-    def __init__(self, workspace_root=None, local=False):
+    def __init__(self, workspace_root=None):
         self.workspace_root = workspace_root
-        self.local = local
 
     def __call__(self, **kwargs):
-        if self.local:
-            return get_packages_in_folder(self.workspace_root)
-        else:
-            return get_all_packages(self.workspace_root)
+        return get_all_packages(self.workspace_root)
+
+
+class LocalPackageCompleter:
+    def __init__(self, workspace_root=None):
+        self.workspace_root = workspace_root
+
+    def __call__(self, **kwargs):
+        return get_packages_in_folder(self.workspace_root)
 
 
 class ExecutableNameCompleter:
