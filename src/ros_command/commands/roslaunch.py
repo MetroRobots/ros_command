@@ -2,9 +2,10 @@ import argcomplete
 import argparse
 import asyncio
 
+from betsy_ros import get_ros_version, get_workspace_root
+
 from ros_command.command_lib import run
 from ros_command.completion import PackageCompleter, LaunchArgCompleter, LaunchFileCompleter
-from ros_command.workspace import get_ros_version, get_workspace_root
 
 
 async def main():
