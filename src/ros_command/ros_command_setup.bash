@@ -5,7 +5,7 @@
 # Attempt to implement roscd upstream: https://github.com/ros2/ros2cli/pull/75
 
 # Only define roscd when it is not defined, i.e. don't overwrite the ROS 1 version
-if ! $(type -t roscd) ; then
+if ! type -t roscd >/dev/null 2>&1; then
     roscd()
     {
         if [[ -z "${ROS_VERSION}" ]]; then
