@@ -1,10 +1,8 @@
 import asyncio
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import DEVNULL, PIPE
-import subprocess
-
+import pathlib
 import sys
-import os
 
 import click
 
@@ -28,13 +26,6 @@ def _default_stdout_callback(line):
 def _default_stderr_callback(line):
     """Default callback for stderr that prints to stdout in red."""
     click.secho(line, fg='red', nl=False)
-
-
-def get_overlayed_command(command):
-    cmds = subprocess.run(['which', '-a', command], stdout=PIPE, text=True).stdout
-    cmds = cmds.splitlines()
-    executing_path = os.path.dirname(os.path.realpath(sys.argv[0]))
-    return next(r for r in cmds if not r.startswith(executing_path))
 
 
 async def run(command, stdout_callback=None, stderr_callback=None, cwd=None):
@@ -76,3 +67,10 @@ async def get_output(command, cwd=None):
                     stderr_callback=lambda line: gather_callback(err, line))
 
     return ret, ''.join(out), ''.join(err)
+
+
+async def get_overlayed_command(command):
+    _, which_output, _ = await get_output(['which', '-a', command])
+    cmds = which_output.splitlines()
+    executing_folder_s = str(pathlib.Path(sys.argv[0]).parent)
+    return next(r for r in cmds if not r.startswith(executing_folder_s))

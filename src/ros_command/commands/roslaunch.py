@@ -22,8 +22,7 @@ async def main():
 
     command = []
     if version == 1:
-        roslaunch = get_overlayed_command('roslaunch')
-        command.append(roslaunch)
+        command.append(await get_overlayed_command('roslaunch'))
     else:
         command.append(f'/opt/ros/{distro}/bin/ros2')
         command.append('launch')

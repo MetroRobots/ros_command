@@ -39,8 +39,7 @@ async def main():
 
     command = []
     if version == 1:
-        rosrun = get_overlayed_command(f'ros{verb}')
-        command.append(rosrun)
+        command.append(await get_overlayed_command(f'ros{verb}'))
     else:
         command.append(f'/opt/ros/{distro}/bin/ros2')
         command.append(verb)
