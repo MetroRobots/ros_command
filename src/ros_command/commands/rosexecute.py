@@ -6,7 +6,7 @@ from betsy_ros import get_ros_version, get_workspace_root
 
 from ros_command.command_lib import run, get_overlayed_command
 from ros_command.completion import PackageCompleter, ExecutableNameCompleter, LaunchFileCompleter
-from ros_command.packages import find_executables_in_package, find_launch_files_in_package
+from ros_command.packages import find_executables_in_package
 
 
 class StartCompleter:
