@@ -5,7 +5,7 @@
 # Attempt to implement roscd upstream: https://github.com/ros2/ros2cli/pull/75
 
 # Only define roscd when it is not defined, i.e. don't overwrite the ROS 1 version
-if ! $(type -t roscd) ; then
+if ! type -t roscd >/dev/null 2>&1; then
     roscd()
     {
         if [[ -z "${ROS_VERSION}" ]]; then
@@ -39,14 +39,16 @@ source_ros()
     fi
 }
 
-eval "$(register-python-argcomplete3 get_ros_directory)"
-eval "$(register-python-argcomplete3 rosaction)"
-eval "$(register-python-argcomplete3 rosbuild)"
-eval "$(register-python-argcomplete3 rosclean)"
-eval "$(register-python-argcomplete3 rosdebug)"
-eval "$(register-python-argcomplete3 rosdep_install)"
-eval "$(register-python-argcomplete3 rosexecute)"
-eval "$(register-python-argcomplete3 roslaunch)"
-eval "$(register-python-argcomplete3 rosmsg)"
-eval "$(register-python-argcomplete3 rosrun)"
-eval "$(register-python-argcomplete3 rossrv)"
+argcomplete=$(which register-python-argcomplete{,3})
+
+eval "$($argcomplete get_ros_directory)"
+eval "$($argcomplete rosaction)"
+eval "$($argcomplete rosbuild)"
+eval "$($argcomplete rosclean)"
+eval "$($argcomplete rosdebug)"
+eval "$($argcomplete rosdep_install)"
+eval "$($argcomplete rosexecute)"
+eval "$($argcomplete roslaunch)"
+eval "$($argcomplete rosmsg)"
+eval "$($argcomplete rosrun)"
+eval "$($argcomplete rossrv)"

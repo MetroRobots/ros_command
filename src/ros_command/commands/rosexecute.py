@@ -4,7 +4,7 @@ import asyncio
 
 from betsy_ros import get_ros_version, get_workspace_root
 
-from ros_command.command_lib import run
+from ros_command.command_lib import run, get_overlayed_command
 from ros_command.completion import PackageCompleter
 from ros_command.packages import find_executables_in_package, find_launch_files_in_package
 
@@ -39,7 +39,7 @@ async def main():
 
     command = []
     if version == 1:
-        command.append(f'/opt/ros/{distro}/bin/ros{verb}')
+        command.append(await get_overlayed_command(f'ros{verb}'))
     else:
         command.append(f'/opt/ros/{distro}/bin/ros2')
         command.append(verb)
