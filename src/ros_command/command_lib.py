@@ -1,6 +1,8 @@
 import asyncio
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import DEVNULL, PIPE
+import pathlib
+import sys
 
 import click
 
@@ -65,3 +67,10 @@ async def get_output(command, cwd=None):
                     stderr_callback=lambda line: gather_callback(err, line))
 
     return ret, ''.join(out), ''.join(err)
+
+
+async def get_overlayed_command(command):
+    _, which_output, _ = await get_output(['which', '-a', command])
+    cmds = which_output.splitlines()
+    executing_folder_s = str(pathlib.Path(sys.argv[0]).parent)
+    return next(r for r in cmds if not r.startswith(executing_folder_s))
