@@ -131,12 +131,13 @@ Users may change the default behavior of `ros_command` by putting settings in ya
 
 The current settings you may change are summarized in this table.
 
-| key              | type                   | default | note                                                           |
-|------------------|------------------------|---------|----------------------------------------------------------------|
-| cmake_build_type | string                 | Release | [CMAKE_BUILD_TYPE](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html) |
-| graphic_build    | boolean                | True    | By default, `rosbuild` shows a fancy graphical interface       |
-| success_sound    | string / absolute path | None    | Sound file path to play after successful builds                |
-| fail_sound       | string / absolute path | None    | Sound file path to play after **un**successful builds          |
+| key                  | type                   | default | note                                                           |
+|----------------------|------------------------|---------|----------------------------------------------------------------|
+| cmake_build_type     | string                 | Release | [CMAKE_BUILD_TYPE](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html) |
+| graphic_build        | boolean                | True    | By default, `rosbuild` shows a fancy graphical interface       |
+| success_sound        | string / absolute path | None    | Sound file path to play after successful builds                |
+| fail_sound           | string / absolute path | None    | Sound file path to play after **un**successful builds          |
+| tab_complete_timeout | string                 | 4h      | Time to cache the tab completions                              |
 
 
 # Power Usage

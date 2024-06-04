@@ -13,8 +13,8 @@ async def main():
     version, distro = get_ros_version()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('package_name').completer = PackageCompleter(workspace_root)
-    parser.add_argument('launch_file_name').completer = LaunchFileCompleter(version)
+    parser.add_argument('package_name').completer = PackageCompleter(workspace_root, version)
+    parser.add_argument('launch_file_name').completer = LaunchFileCompleter(workspace_root, version)
     parser.add_argument('argv', nargs=argparse.REMAINDER).completer = LaunchArgCompleter(workspace_root, version)
 
     argcomplete.autocomplete(parser, always_complete_options=False)
