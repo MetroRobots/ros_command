@@ -16,9 +16,9 @@ The `ros_command` package provides a set of command line interfaces for common a
 # Setup
 This tool uses Python 3.
 
-    git clone git@github.com:MetroRobots/ros_command.git
-    cd ros_command
-    sudo pip3 install .
+    sudo pip3 install ros-command
+
+[![PyPI version](https://badge.fury.io/py/ros-command.svg)](https://badge.fury.io/py/ros-command)
 
 It also uses some BASH scripts. It is recommended that you add `source $(get_ros_command_bash)` to your `.bashrc`. This will enable the bash-only commands (`roscd` and `source_ros`) and enable tab completion of the other commands.
 
