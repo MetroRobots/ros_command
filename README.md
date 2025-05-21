@@ -137,7 +137,9 @@ The current settings you may change are summarized in this table.
 | graphic_build        | boolean                | True    | By default, `rosbuild` shows a fancy graphical interface       |
 | success_sound        | string / absolute path | None    | Sound file path to play after successful builds                |
 | fail_sound           | string / absolute path | None    | Sound file path to play after **un**successful builds          |
-| tab_complete_timeout | string                 | 4h      | Time to cache the tab completions                              |
+| extra_cmake_args     | list of strings        | []      | Args added to `--cmake-args` in build command                  |
+| extra_build_args     | list of strings        | []      | List of tokens added to the end of the build command           |
+| tab_complete_timeout | string                 | 4h      | Time to cache the tab completions. Examples: [`1h`, `2m30s`](https://stackoverflow.com/a/51916936) |
 
 
 # Power Usage
