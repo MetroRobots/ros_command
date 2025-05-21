@@ -180,7 +180,7 @@ async def get_catkin_tools_graph(workspace_root, package_selection_args):
     error_text = ''
 
     def stdout_callback(line):
-        nonlocal upstream, pkg_name, build_depends, run_section
+        nonlocal pkg_name, build_depends, run_section
         if line[0] != ' ':
             if pkg_name:
                 upstream[pkg_name] = build_depends

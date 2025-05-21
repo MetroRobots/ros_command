@@ -19,19 +19,20 @@ repos:
   - id: check-shebang-scripts-are-executable
   - id: check-yaml
 - repo: https://github.com/hhatto/autopep8
-  rev: v2.3.1
+  rev: v2.3.2
   hooks:
   - id: autopep8
 - repo: https://github.com/PyCQA/flake8
-  rev: 7.1.1
+  rev: 7.2.0
   hooks:
   - id: flake8
-- repo: https://github.com/lovesegfault/beautysh
-  rev: v6.2.1
-  hooks:
-  - id: beautysh
+# Broken: https://github.com/lovesegfault/beautysh/pull/251
+# - repo: https://github.com/lovesegfault/beautysh
+#  rev: v6.2.1
+#  hooks:
+#  - id: beautysh
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.3.0
+  rev: v2.4.1
   hooks:
   - id: codespell
     args:
