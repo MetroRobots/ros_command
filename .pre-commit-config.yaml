@@ -26,10 +26,11 @@ repos:
   rev: 7.2.0
   hooks:
   - id: flake8
-- repo: https://github.com/lovesegfault/beautysh
-  rev: v6.2.1
-  hooks:
-  - id: beautysh
+# Broken: https://github.com/lovesegfault/beautysh/pull/251
+# - repo: https://github.com/lovesegfault/beautysh
+#  rev: v6.2.1
+#  hooks:
+#  - id: beautysh
 - repo: https://github.com/codespell-project/codespell
   rev: v2.4.1
   hooks:

@@ -66,7 +66,6 @@ class Completer:
             return d['data']
 
     def write_to_cache(self, cache_keys, results):
-        global THE_CACHE
         if cache_keys is None:
             return
 
