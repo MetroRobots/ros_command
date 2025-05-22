@@ -3,6 +3,7 @@ import pathlib
 import re
 import yaml
 
+from betsy_ros.environment import get_topics
 from ros_command.packages import get_all_packages, get_packages_in_folder, get_launch_file_arguments
 from ros_command.packages import find_executables_in_package, find_launch_files_in_package
 from ros_command.util import get_config
@@ -137,3 +138,24 @@ class LaunchArgCompleter(Completer):
                 i = arg_s.index(':=')
                 existing_args.add(arg_s[:i+2])
         return [a for a in values if a not in existing_args]
+
+
+class TopicCompleter(Completer):
+    def get_cache_keys(self, **kwargs):
+        return [str(self.version), 'topics']
+
+    def get_completions(self, prefix, parsed_args, **kwargs):
+        matches = []
+        for topic in get_topics(self.version):
+            if topic.startswith(prefix):
+                matches.append(topic)
+        return matches
+
+
+class TopicsCompleter(TopicCompleter):
+    def get_completions(self, prefix, parsed_args, **kwargs):
+        matches = []
+        for topic in TopicCompleter.get_completions(self, prefix, parsed_args, **kwargs):
+            if topic not in parsed_args.topics:
+                matches.append(topic)
+        return matches

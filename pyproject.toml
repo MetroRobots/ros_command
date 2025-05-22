@@ -16,7 +16,7 @@ maintainers = [
 dependencies = [
   "argcomplete",
   "argparse",
-  "betsy-ros",
+  "betsy-ros>=0.2.0",
   "blessed",
   "click",
   "pyyaml",
@@ -40,6 +40,7 @@ roslaunch = "ros_command.commands.roslaunch:main_launch"
 rosmsg = "ros_command.commands.rosinterface:main_msg"
 rosrun = "ros_command.commands.rosrun:main_rosrun"
 rossrv = "ros_command.commands.rosinterface:main_srv"
+rostopic = "ros_command.commands.rostopic:main_rostopic"
 
 [project.urls]
 Homepage = "https://github.com/MetroRobots/ros_command"
