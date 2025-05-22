@@ -124,6 +124,10 @@ The `rosclean` command works as a hybrid of `rosclean` and `catkin clean`.
 
 You can also throw the word `purge` at the beginning just to mirror the ROS 1 `rosclean` more closely.
 
+## rostopic
+The commands for `rostopic` are strikingly similar for ROS 1 and ROS 2, but are provided here as a convenience.
+
+
 # Configuration
 Users may change the default behavior of `ros_command` by putting settings in yaml files in two places.
  * `ros_command.yaml` in the workspace root (highest precedence)
